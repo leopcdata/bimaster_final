@@ -1,5 +1,6 @@
 #### Aluno: [Leonardo Cardoso](https://github.com/leopcdata)
-#### Orientadora: [Nome da Orientadora](https://github.com/link_do_github)
+#### Orientadora: [Evelyn Batista](https://github.com/link_do_github)
+---
 ---
 
 Trabalho apresentado ao curso [BI MASTER](https://ica.puc-rio.ai/bi-master) como pré-requisito para conclusão de curso e obtenção de crédito na disciplina "Projetos de Sistemas Inteligentes de Apoio à Decisão".
@@ -10,39 +11,48 @@ Trabalho apresentado ao curso [BI MASTER](https://ica.puc-rio.ai/bi-master) como
 
 ### Resumo
 
-Este trabalho apresenta o desenvolvimento de uma ferramenta em Python de apoio à decisão para automatizar e padronizar o processo de identificação e classificação de clientes no contexto de integração de empresas adquiridas pela IBM. O problema surgiu a partir da aceleração da estratégia de aquisições da companhia e da redução do prazo de integração para menos de um ano, o que aumentou significativamente a pressão sobre processos operacionais da área de Sales Compensation.
+Este trabalho apresenta o desenvolvimento de uma ferramenta em Python de apoio à decisão para automatizar e padronizar o processo de identificação e classificação de clientes no contexto de integração de empresas adquiridas em uma grande organização global. O problema surgiu a partir da aceleração da estratégia de aquisições e da redução do prazo de integração para menos de um ano, o que aumentou significativamente a pressão sobre processos operacionais da área de Sales Compensation.
 
-Na IBM, a correta configuração dos territórios comerciais é essencial para a definição dos planos de venda, cálculo de metas e pagamento de comissões. No caso de vendedores oriundos de aquisições, um dos passos críticos da integração consiste em mapear corretamente os clientes que passarão a compor seus territórios. Atualmente, esse processo é realizado manualmente, com base em planilhas enviadas pelos gestores de vendas contendo milhares de empresas, exigindo busca individual em uma base corporativa com milhões de registros ativos e análise da posição hierárquica de cada cliente dentro da estrutura comercial da IBM.
+Nesse contexto, a correta configuração dos territórios comerciais é essencial para a definição dos planos de venda, cálculo de metas e pagamento de comissões. No caso de vendedores oriundos de aquisições, um dos passos críticos da integração consiste em mapear corretamente os clientes que passarão a compor seus territórios. Atualmente, esse processo é realizado manualmente, com base em planilhas enviadas pelos gestores de vendas contendo milhares de empresas, exigindo busca individual em uma base corporativa com milhões de registros ativos e análise da posição hierárquica de cada cliente dentro da estrutura comercial da organização.
 
-A complexidade do processo decorre de diferentes fatores: variações de grafia, abreviações, sufixos societários, nomes fantasia, dados antigos ainda ativos na base e múltiplos níveis hierárquicos de segmentação comercial. A solução proposta utiliza extração de dados em IBM DB2, normalização textual, fuzzy matching, regras de priorização por grupos de contas e geração de saídas estruturadas para apoiar a tomada de decisão. Como resultado, a ferramenta busca reduzir drasticamente o esforço manual, aumentar a consistência do processo, melhorar a acurácia do mapping e acelerar a integração comercial de empresas adquiridas.
+A complexidade do processo decorre de diferentes fatores: variações de grafia, abreviações, sufixos societários, nomes fantasia, dados antigos ainda ativos na base e múltiplos níveis hierárquicos de segmentação comercial. A solução proposta utiliza extração de dados em DB2, normalização textual, fuzzy matching, regras de priorização por grupos de contas e geração de saídas estruturadas para apoiar a tomada de decisão. Como resultado, a ferramenta busca reduzir drasticamente o esforço manual, aumentar a consistência do processo, melhorar a acurácia do mapping e acelerar a integração comercial de empresas adquiridas.
 
 ### Abstract
 
-This project presents the development of a Python-based decision support tool to automate and standardize the customer identification and classification process in the context of acquired-company integration at IBM. The problem emerged as IBM accelerated its acquisition strategy and reduced the integration timeline to less than one year, significantly increasing pressure on operational processes within Sales Compensation.
+This project presents the development of a Python-based decision support tool to automate and standardize the customer identification and classification process in the context of acquired-company integration within a large global organization. The problem emerged as the organization accelerated its acquisition strategy and reduced the integration timeline to less than one year, significantly increasing pressure on operational processes within Sales Compensation.
 
-At IBM, the correct configuration of sales territories is essential for defining sales plans, calculating quotas, and enabling commission payments. For sellers joining through acquisitions, one of the most critical integration steps is accurately mapping the customer list that will compose their territories. Today this activity is performed manually, based on spreadsheets provided by sales managers and containing thousands of companies. Each company must be searched individually in a corporate customer base with millions of active records, while also being classified within IBM’s commercial hierarchy.
+In this environment, the correct configuration of sales territories is essential for defining sales plans, calculating quotas, and enabling commission payments. For sellers joining through acquisitions, one of the most critical integration steps is accurately mapping the customer list that will compose their territories. Today this activity is performed manually, based on spreadsheets provided by sales managers and containing thousands of companies. Each company must be searched individually in a corporate customer base with millions of active records, while also being classified within the organization’s commercial hierarchy.
 
-The complexity of the process comes from several factors: spelling variations, abbreviations, legal suffixes, trade names, outdated records that remain active in the database, and multiple hierarchical levels within IBM’s go-to-market segmentation. The proposed solution uses IBM DB2 data extraction, text normalization, fuzzy matching, account-group prioritization rules, and structured outputs to support decision-making. As a result, the tool aims to drastically reduce manual effort, improve process consistency, increase mapping accuracy, and accelerate the commercial integration of acquired companies.
+The complexity of the process comes from several factors: spelling variations, abbreviations, legal suffixes, trade names, outdated records that remain active in the database, and multiple hierarchical levels within the commercial segmentation model. The proposed solution uses DB2 data extraction, text normalization, fuzzy matching, account-group prioritization rules, and structured outputs to support decision-making. As a result, the tool aims to drastically reduce manual effort, improve process consistency, increase mapping accuracy, and accelerate the commercial integration of acquired companies.
 
 ### 1. Introdução
 
-Atuo no departamento de Sales Compensation da IBM, área responsável por processos que vão desde a criação dos planos de venda até o pagamento da comissão de todos os vendedores. Dentro desse contexto, a correta definição dos clientes que compõem o território de cada vendedor é fundamental, pois influencia diretamente o cálculo de metas, a elegibilidade de vendas e o pagamento de comissão ao longo do ano.
+Atuo no departamento de Sales Compensation de uma grande empresa global de tecnologia, área responsável por processos que vão desde a criação dos planos de venda até o pagamento da comissão dos vendedores. Dentro desse contexto, a correta definição dos clientes que compõem o território de cada vendedor é fundamental, pois influencia diretamente o cálculo de metas, a elegibilidade de vendas e o pagamento de comissão ao longo do ano.
 
-A IBM acelerou sua estratégia de aquisições e reduziu o prazo de integração para menos de um ano. Essa mudança trouxe um desafio importante para minha área: integrar mais rapidamente vendedores vindos de empresas adquiridas, junto com suas respectivas carteiras de clientes, sem comprometer a qualidade do processo. Um dos passos essenciais dessa integração é mapear a carta de clientes para que os territórios dos vendedores migrando sejam configurados corretamente no sistema da IBM.
+Nos últimos anos, a companhia acelerou sua estratégia de aquisições e reduziu o prazo de integração para menos de um ano. Essa mudança trouxe um desafio importante para minha área: integrar mais rapidamente vendedores vindos de empresas adquiridas, junto com suas respectivas carteiras de clientes, sem comprometer a qualidade do processo. Um dos passos essenciais dessa integração é mapear a carta de clientes para que os territórios dos vendedores migrando sejam configurados corretamente no sistema corporativo.
 
-Hoje esse processo é totalmente manual. Os gerentes de vendas da empresa adquirida enviam uma planilha contendo os nomes das empresas e os países das contas que o vendedor deve cobrir. A partir dessa lista, os analistas precisam buscar individualmente cada empresa na plataforma web de registro de clientes da IBM, comparar múltiplos resultados e decidir qual conta representa melhor aquela empresa dentro da hierarquia comercial da companhia.
+Hoje esse processo é totalmente manual. Os gerentes de vendas da empresa adquirida enviam uma planilha contendo os nomes das empresas e os países das contas que o vendedor deve cobrir. A partir dessa lista, os analistas precisam buscar individualmente cada empresa na plataforma corporativa de registro de clientes, comparar múltiplos resultados e decidir qual conta representa melhor aquela empresa dentro da hierarquia comercial vigente.
 
-Essa atividade consome muito tempo e esforço. Durante a última integração, cerca de 10 pessoas foram envolvidas nesse trabalho durante 1 semana inteira. O esforço é alto porque a base possui mais de 3 milhões de entradas ativas e uma única busca pode retornar dezenas ou centenas de resultados. Em uma simulação feita com “Bradesco”, por exemplo, a busca retornou mais de 500 registros.
+Essa atividade consome muito tempo e esforço. Em uma integração recente, cerca de 10 pessoas precisaram trabalhar durante aproximadamente uma semana inteira apenas para concluir a etapa de mapping. O esforço é alto porque a base possui milhões de entradas ativas e uma única busca pode retornar dezenas ou até centenas de resultados possíveis.
 
-Além do volume, há também um problema de qualidade e ambiguidade dos dados. Os nomes das empresas fornecidos pelos gestores nem sempre seguem o mesmo padrão da base interna. É comum encontrar diferenças de grafia, vírgulas, sufixos como “Inc.”, “LLC”, “Ltda”, abreviações, siglas internas, nomes fantasia e outras variações. Isso inviabiliza qualquer tentativa de resolver o problema apenas com busca exata por texto.
+Além do volume, há também um problema de qualidade e ambiguidade dos dados. Os nomes das empresas fornecidos pelos gestores nem sempre seguem o mesmo padrão da base interna. É comum encontrar diferenças de grafia, vírgulas, sufixos como “Inc.”, “LLC”, “Ltda”, abreviações, siglas internas, nomes fantasia e outras variações. Isso inviabiliza uma solução baseada apenas em busca exata de texto.
 
-Outro fator que torna a tarefa ainda mais complexa é que o analista não precisa apenas encontrar um nome parecido. Ele precisa decidir em qual mercado e em qual nível da segmentação comercial da IBM aquela conta se encontra. Existem diferentes níveis hierárquicos dentro do go-to-market da IBM, e essa decisão impacta diretamente a forma como o território será configurado.
+Outro fator que torna a tarefa ainda mais complexa é que o analista não precisa apenas encontrar um nome semelhante. Ele precisa decidir em qual mercado e em qual nível da segmentação comercial aquela conta se encontra. Em outras palavras, o problema não é somente “qual registro parece mais com esse nome?”, mas sim “qual é o nível hierárquico mais adequado para configurar corretamente o território do vendedor?”.
 
-Para grandes clientes, a hierarquia dedicada deve ser priorizada em relação a estruturas genéricas. Por exemplo, se uma busca por “Bradesco” retorna tanto uma entrada específica da hierarquia dedicada do grupo Bradesco quanto uma entrada genérica de instituições financeiras do Brasil, o correto é priorizar a estrutura dedicada de Bradesco. Isso garante que o vendedor receba por qualquer venda feita para todo o grupo econômico e suas filiadas, e não apenas por uma parte genérica da segmentação.
+Esse ponto é especialmente relevante porque a estrutura comercial utilizada pela organização não é plana. Em 2026, os clientes estão distribuídos em quatro grandes segmentos, que refletem diferentes níveis de dedicação comercial:
 
-Esse contexto torna o problema tratado neste projeto mais amplo do que uma simples tarefa de busca textual. O objetivo é recomendar o nível mais apropriado e o respectivo identificador dentro da hierarquia de segmentação da IBM para cada cliente da lista recebida, sinalizar quando não for possível decidir automaticamente entre duas ou mais opções e indicar claramente os clientes não encontrados.
+- **Enterprise**
+- **Strategic**
+- **Select Horizon**
+- **Select Territory**
 
-Do ponto de vista de negócio, a importância desse mapping é alta. Os planos de venda são oferecidos no início do ano pelos gestores e, depois disso, só podem ser alterados em condições muito específicas. Esses planos são compostos basicamente pelos clientes que o vendedor deve atender e pelos produtos que deve vender. Com base nesses parâmetros, o sistema calcula uma meta de vendas usando histórico dos clientes e estratégia de crescimento. Por isso, é essencial atribuir o cliente corretamente já na origem, pois não é possível ir adicionando clientes e metas ao longo do ano conforme novas oportunidades surgem, já que isso seria considerado manipulação de comissão.
+Nos segmentos Enterprise, Strategic e Horizon, é comum que clientes relevantes possuam estruturas de cobertura mais dedicadas, muitas vezes associadas a um identificador específico. Já no segmento Select Territory, milhares de clientes podem estar agrupados em estruturas mais amplas, definidas por critérios como geografia, indústria ou combinação entre ambos.
+
+A cobertura é um dos principais blocos de construção usados para definir territórios de vendedores. Em alguns casos, uma cobertura representa praticamente um cliente individual; em outros, representa um agrupamento de dezenas ou milhares de clientes. Isso torna a decisão de mapping mais sofisticada do que uma simples comparação textual, já que é preciso escolher não só um nome correspondente, mas o nível correto dentro da estrutura comercial.
+
+Grandes clientes costumam possuir uma hierarquia dedicada. Por isso, quando uma busca retorna tanto uma estrutura específica de um grande grupo econômico quanto uma estrutura mais genérica de mercado ou indústria, a recomendação correta deve priorizar a estrutura dedicada. Essa decisão é importante porque garante que o vendedor receba corretamente por oportunidades relacionadas a toda a organização e suas afiliadas, e não apenas por uma classificação genérica mais ampla.
+
+Do ponto de vista de negócio, a importância desse mapping é alta. Os planos de venda são oferecidos no início do ano e, depois disso, só podem ser alterados em condições muito específicas. Esses planos são compostos basicamente pelos clientes que o vendedor deve atender e pelos produtos que deve vender. Com base nesses parâmetros, o sistema calcula metas usando histórico dos clientes e estratégia de crescimento. Por isso, é essencial atribuir o cliente corretamente já na origem, pois não é possível ir adicionando clientes e metas ao longo do ano conforme novas oportunidades surgem, já que isso seria interpretado como manipulação de comissão.
 
 Diante desse cenário, este trabalho propõe a construção de uma ferramenta de apoio à decisão capaz de reduzir o esforço manual, padronizar o processo, aumentar a acurácia do mapping e permitir decisões mais rápidas e consistentes.
 
@@ -54,7 +64,7 @@ A modelagem da solução foi construída em etapas, buscando refletir o processo
 
 #### 2.1 Extração de dados
 
-O primeiro desafio do projeto foi acessar diretamente a base corporativa usada como referência para o mapping. Para isso, foi criada uma conexão com IBM DB2, permitindo a execução de uma SQL capaz de trazer clientes ativos, com filtros de aprovação, listas válidas de segmentação e atributos relevantes para decisão.
+O primeiro desafio do projeto foi acessar diretamente a base corporativa usada como referência para o mapping. Para isso, foi criada uma conexão com DB2, permitindo a execução de uma SQL capaz de trazer clientes ativos, já aplicando filtros de aprovação, validade e segmentação relevantes para o processo.
 
 A consulta retorna, entre outros campos:
 - identificador e nome da cobertura
@@ -65,7 +75,7 @@ A consulta retorna, entre outros campos:
 - indústria
 - país
 
-Uma decisão importante foi restringir a consulta às listas de segmentação relevantes para o problema, reduzindo o universo de busca e aproximando o resultado das regras de negócio reais. Isso trouxe dois ganhos: melhor performance e maior aderência à realidade operacional.
+Uma decisão importante foi restringir a consulta às listas de segmentação relevantes para o problema, reduzindo o universo de busca e aproximando o resultado das regras reais do processo. Isso trouxe dois ganhos: melhor performance e maior aderência ao contexto operacional.
 
 Também foi implementado um mecanismo de cache por país. Quando a consulta já foi executada anteriormente para um determinado código de país, o resultado é salvo em arquivo e pode ser reutilizado em execuções futuras, evitando reconsultas desnecessárias ao banco e reduzindo o tempo de processamento.
 
@@ -77,7 +87,7 @@ O segundo desafio foi tratar a inconsistência dos nomes das empresas no input e
 - `Alstom Signaling Operation, LLC`
 - `Alter Trading Corporation`
 
-podem existir no banco em diferentes formatos, sem vírgula, sem “Inc.”, sem “LLC” ou com pequenas alterações que não mudam a identidade da empresa.
+podem existir na base em diferentes formatos, sem vírgula, sem “Inc.”, sem “LLC” ou com pequenas alterações que não mudam a identidade principal da empresa.
 
 Para lidar com isso, foi criada uma rotina de normalização textual. Essa rotina:
 - converte os nomes para minúsculas
@@ -137,7 +147,7 @@ Os Grupos 1 e 2 retornam resultados em nível de **COV_TYPE_ID**, pois nesse con
 
 Os Grupos 3 e 4 retornam principalmente em nível de **GBL_BUY_GRP**, com tratamento especial para alguns casos específicos em que a melhor forma de exibição é **DOM_BUY_GRP**.
 
-Essa separação foi uma das principais evoluções do projeto, pois permitiu refletir melhor as regras reais de segmentação da IBM e organizar a lógica de decisão de forma mais clara.
+Essa separação foi uma das principais evoluções do projeto, pois permitiu refletir melhor as regras de segmentação comercial e organizar a lógica de decisão de forma mais clara.
 
 #### 2.5 Regras de priorização
 
@@ -187,22 +197,25 @@ No caso de **Activate Unassigned**, foi incluída uma observação importante no
 
 #### 2.7 Desafios enfrentados e soluções encontradas
 
-Ao longo da execução do projeto, alguns desafios importantes surgiram:
+Ao longo da execução do projeto, alguns desafios importantes surgiram.
 
 **1. Diferença entre matching bruto e matching normalizado**  
 Em uma versão inicial, a análise considerada como “raw” ainda estava sendo executada sobre nomes normalizados, o que eliminava parte do valor da dupla abordagem. Esse problema foi corrigido ao separar explicitamente as estruturas de comparação para nome bruto e nome normalizado.
 
 **2. Duplicidade de resultados**  
-Como os candidatos podiam surgir a partir de mais de uma etapa de matching, houve necessidade de criar uma estratégia de deduplicação com base em atributos-chave do resultado.
+Como os candidatos podiam surgir a partir de mais de uma etapa de matching, houve necessidade de criar uma estratégia de deduplicação com base em atributos-chave do resultado, reduzindo repetição e melhorando a qualidade da saída final.
 
 **3. Organização do código**  
-A primeira versão concentrava muitas responsabilidades no arquivo principal. Ao longo da evolução, a solução foi modularizada em arquivos separados para configuração, execução, métricas, preparação de dados, matching, summary e acesso ao banco, tornando o projeto mais limpo e mais sustentável.
+A primeira versão concentrava muitas responsabilidades no arquivo principal. Ao longo da evolução, a solução foi modularizada em arquivos separados para configuração, execução, métricas, preparação de dados, matching, summary e acesso ao banco, tornando o projeto mais limpo, mais legível e mais sustentável.
 
 **4. Performance**  
-Foi implementado benchmark entre execução sequencial e paralela. O resultado mostrou que, no ambiente testado, a execução sequencial apresentou melhor desempenho total do que a paralela. Isso indicou que o workload do projeto é predominantemente CPU-bound, e que o overhead de threads superava os ganhos potenciais de concorrência. A partir disso, a execução sequencial passou a ser o modo padrão, mantendo o benchmark como opção.
+Foi implementado benchmark entre execução sequencial e paralela. O resultado mostrou que, no ambiente testado, a execução sequencial apresentou melhor desempenho total do que a paralela. Isso indicou que o workload do projeto é predominantemente CPU-bound, e que o overhead de threads superava os ganhos potenciais de concorrência. A partir disso, a execução sequencial passou a ser o modo padrão, mantendo o benchmark como opção para análise.
 
 **5. Representação das regras de negócio**  
-Outro desafio foi traduzir corretamente as regras de priorização da IBM para uma lógica programável. A solução encontrada foi estruturar os grupos com configuração centralizada e regras explícitas no resumo final.
+Outro desafio foi traduzir corretamente as regras de priorização da estrutura comercial para uma lógica programável. A solução encontrada foi estruturar os grupos com configuração centralizada e regras explícitas no resumo final, permitindo ajustes futuros com menor esforço.
+
+**6. Variação entre mercados e países**  
+Outro desafio relevante é que a estrutura de cobertura não é universal e pode variar entre países e mercados. Cada unidade geográfica pode definir suas próprias regras e estratégias locais para agrupar clientes, desde que alinhadas ao modelo comercial global. Além disso, a estrutura de cobertura é revisada a cada ciclo de planejamento e depois permanece congelada durante o ciclo de execução. Isso reforça a necessidade de tomar a decisão correta no momento do mapping, já que a configuração inicial do território terá impacto durante todo o período de vigência do plano de venda.
 
 ### 3. Resultados
 
@@ -222,7 +235,7 @@ Do ponto de vista operacional, isso representa uma redução significativa do es
 
 Do ponto de vista de qualidade, a solução traz mais consistência. O processo deixa de depender exclusivamente da interpretação individual de cada analista e passa a seguir regras padronizadas, replicáveis e documentadas.
 
-Do ponto de vista analítico, a inclusão da aba de métricas também trouxe valor adicional. A partir dela, passou a ser possível medir:
+Do ponto de vista analítico, a inclusão da aba de métricas trouxe valor adicional. A partir dela, passou a ser possível medir:
 - percentual de empresas encontradas
 - percentual de empresas não encontradas
 - percentual de matches por grupo
@@ -230,7 +243,7 @@ Do ponto de vista analítico, a inclusão da aba de métricas também trouxe val
 - empresas com múltiplos resultados no Summary
 - tempo por empresa processada
 
-Esses indicadores permitem avaliar tanto a eficiência da execução quanto a qualidade das recomendações geradas.
+Os resultados do projeto mostram que a automação não apenas reduz o esforço de busca e comparação textual, mas também apoia uma decisão mais sofisticada: recomendar o nível mais adequado dentro de uma estrutura comercial hierárquica, na qual diferentes segmentos e coberturas possuem papéis distintos na definição dos territórios.
 
 Mesmo quando a ferramenta não consegue decidir automaticamente uma única resposta ideal, ela ainda gera valor relevante ao reduzir o universo de busca e apresentar os candidatos mais plausíveis de forma organizada, deixando claro onde há conflito e onde a revisão humana é necessária.
 
@@ -243,7 +256,7 @@ A ferramenta proposta endereça um problema crítico no contexto de aquisições
 Como contribuição prática, o projeto oferece uma solução que reduz drasticamente o esforço manual, melhora a consistência do processo, acelera decisões e cria uma base estruturada para evolução contínua.
 
 Como contribuição técnica, o projeto integra:
-- conexão com IBM DB2
+- conexão com DB2
 - extração estruturada de dados
 - normalização textual
 - fuzzy matching
