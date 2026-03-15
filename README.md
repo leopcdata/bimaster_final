@@ -1,2 +1,271 @@
-# bimaster_final
-Projeto final de conclusão do curso BI Master
+#### Aluno: [Leonardo Cardoso](https://github.com/leopcdata)
+#### Orientadora: [Nome da Orientadora](https://github.com/link_do_github)
+---
+
+Trabalho apresentado ao curso [BI MASTER](https://ica.puc-rio.ai/bi-master) como pré-requisito para conclusão de curso e obtenção de crédito na disciplina "Projetos de Sistemas Inteligentes de Apoio à Decisão".
+
+- [Link para o código](https://github.com/leopcdata/bimaster_final)
+
+---
+
+### Resumo
+
+Este trabalho apresenta o desenvolvimento de uma ferramenta em Python de apoio à decisão para automatizar e padronizar o processo de identificação e classificação de clientes no contexto de integração de empresas adquiridas pela IBM. O problema surgiu a partir da aceleração da estratégia de aquisições da companhia e da redução do prazo de integração para menos de um ano, o que aumentou significativamente a pressão sobre processos operacionais da área de Sales Compensation.
+
+Na IBM, a correta configuração dos territórios comerciais é essencial para a definição dos planos de venda, cálculo de metas e pagamento de comissões. No caso de vendedores oriundos de aquisições, um dos passos críticos da integração consiste em mapear corretamente os clientes que passarão a compor seus territórios. Atualmente, esse processo é realizado manualmente, com base em planilhas enviadas pelos gestores de vendas contendo milhares de empresas, exigindo busca individual em uma base corporativa com milhões de registros ativos e análise da posição hierárquica de cada cliente dentro da estrutura comercial da IBM.
+
+A complexidade do processo decorre de diferentes fatores: variações de grafia, abreviações, sufixos societários, nomes fantasia, dados antigos ainda ativos na base e múltiplos níveis hierárquicos de segmentação comercial. A solução proposta utiliza extração de dados em IBM DB2, normalização textual, fuzzy matching, regras de priorização por grupos de contas e geração de saídas estruturadas para apoiar a tomada de decisão. Como resultado, a ferramenta busca reduzir drasticamente o esforço manual, aumentar a consistência do processo, melhorar a acurácia do mapping e acelerar a integração comercial de empresas adquiridas.
+
+### Abstract
+
+This project presents the development of a Python-based decision support tool to automate and standardize the customer identification and classification process in the context of acquired-company integration at IBM. The problem emerged as IBM accelerated its acquisition strategy and reduced the integration timeline to less than one year, significantly increasing pressure on operational processes within Sales Compensation.
+
+At IBM, the correct configuration of sales territories is essential for defining sales plans, calculating quotas, and enabling commission payments. For sellers joining through acquisitions, one of the most critical integration steps is accurately mapping the customer list that will compose their territories. Today this activity is performed manually, based on spreadsheets provided by sales managers and containing thousands of companies. Each company must be searched individually in a corporate customer base with millions of active records, while also being classified within IBM’s commercial hierarchy.
+
+The complexity of the process comes from several factors: spelling variations, abbreviations, legal suffixes, trade names, outdated records that remain active in the database, and multiple hierarchical levels within IBM’s go-to-market segmentation. The proposed solution uses IBM DB2 data extraction, text normalization, fuzzy matching, account-group prioritization rules, and structured outputs to support decision-making. As a result, the tool aims to drastically reduce manual effort, improve process consistency, increase mapping accuracy, and accelerate the commercial integration of acquired companies.
+
+### 1. Introdução
+
+Atuo no departamento de Sales Compensation da IBM, área responsável por processos que vão desde a criação dos planos de venda até o pagamento da comissão de todos os vendedores. Dentro desse contexto, a correta definição dos clientes que compõem o território de cada vendedor é fundamental, pois influencia diretamente o cálculo de metas, a elegibilidade de vendas e o pagamento de comissão ao longo do ano.
+
+A IBM acelerou sua estratégia de aquisições e reduziu o prazo de integração para menos de um ano. Essa mudança trouxe um desafio importante para minha área: integrar mais rapidamente vendedores vindos de empresas adquiridas, junto com suas respectivas carteiras de clientes, sem comprometer a qualidade do processo. Um dos passos essenciais dessa integração é mapear a carta de clientes para que os territórios dos vendedores migrando sejam configurados corretamente no sistema da IBM.
+
+Hoje esse processo é totalmente manual. Os gerentes de vendas da empresa adquirida enviam uma planilha contendo os nomes das empresas e os países das contas que o vendedor deve cobrir. A partir dessa lista, os analistas precisam buscar individualmente cada empresa na plataforma web de registro de clientes da IBM, comparar múltiplos resultados e decidir qual conta representa melhor aquela empresa dentro da hierarquia comercial da companhia.
+
+Essa atividade consome muito tempo e esforço. Durante a última integração, cerca de 10 pessoas foram envolvidas nesse trabalho durante 1 semana inteira. O esforço é alto porque a base possui mais de 3 milhões de entradas ativas e uma única busca pode retornar dezenas ou centenas de resultados. Em uma simulação feita com “Bradesco”, por exemplo, a busca retornou mais de 500 registros.
+
+Além do volume, há também um problema de qualidade e ambiguidade dos dados. Os nomes das empresas fornecidos pelos gestores nem sempre seguem o mesmo padrão da base interna. É comum encontrar diferenças de grafia, vírgulas, sufixos como “Inc.”, “LLC”, “Ltda”, abreviações, siglas internas, nomes fantasia e outras variações. Isso inviabiliza qualquer tentativa de resolver o problema apenas com busca exata por texto.
+
+Outro fator que torna a tarefa ainda mais complexa é que o analista não precisa apenas encontrar um nome parecido. Ele precisa decidir em qual mercado e em qual nível da segmentação comercial da IBM aquela conta se encontra. Existem diferentes níveis hierárquicos dentro do go-to-market da IBM, e essa decisão impacta diretamente a forma como o território será configurado.
+
+Para grandes clientes, a hierarquia dedicada deve ser priorizada em relação a estruturas genéricas. Por exemplo, se uma busca por “Bradesco” retorna tanto uma entrada específica da hierarquia dedicada do grupo Bradesco quanto uma entrada genérica de instituições financeiras do Brasil, o correto é priorizar a estrutura dedicada de Bradesco. Isso garante que o vendedor receba por qualquer venda feita para todo o grupo econômico e suas filiadas, e não apenas por uma parte genérica da segmentação.
+
+Esse contexto torna o problema tratado neste projeto mais amplo do que uma simples tarefa de busca textual. O objetivo é recomendar o nível mais apropriado e o respectivo identificador dentro da hierarquia de segmentação da IBM para cada cliente da lista recebida, sinalizar quando não for possível decidir automaticamente entre duas ou mais opções e indicar claramente os clientes não encontrados.
+
+Do ponto de vista de negócio, a importância desse mapping é alta. Os planos de venda são oferecidos no início do ano pelos gestores e, depois disso, só podem ser alterados em condições muito específicas. Esses planos são compostos basicamente pelos clientes que o vendedor deve atender e pelos produtos que deve vender. Com base nesses parâmetros, o sistema calcula uma meta de vendas usando histórico dos clientes e estratégia de crescimento. Por isso, é essencial atribuir o cliente corretamente já na origem, pois não é possível ir adicionando clientes e metas ao longo do ano conforme novas oportunidades surgem, já que isso seria considerado manipulação de comissão.
+
+Diante desse cenário, este trabalho propõe a construção de uma ferramenta de apoio à decisão capaz de reduzir o esforço manual, padronizar o processo, aumentar a acurácia do mapping e permitir decisões mais rápidas e consistentes.
+
+### 2. Modelagem
+
+A proposta desenvolvida neste trabalho consiste em uma ferramenta em Python de apoio à decisão para automatizar a etapa de identificação e recomendação de contas no processo de integração de vendedores vindos de aquisições. A ferramenta não substitui totalmente o julgamento humano, mas automatiza a parte mais custosa do fluxo: busca inicial, comparação textual, classificação preliminar e priorização de candidatos.
+
+A modelagem da solução foi construída em etapas, buscando refletir o processo real executado pelos analistas, mas de forma estruturada, mensurável e reproduzível.
+
+#### 2.1 Extração de dados
+
+O primeiro desafio do projeto foi acessar diretamente a base corporativa usada como referência para o mapping. Para isso, foi criada uma conexão com IBM DB2, permitindo a execução de uma SQL capaz de trazer clientes ativos, com filtros de aprovação, listas válidas de segmentação e atributos relevantes para decisão.
+
+A consulta retorna, entre outros campos:
+- identificador e nome da cobertura
+- grupos globais e domésticos de buying group
+- identificador e nome do global client
+- nome legal do cliente
+- listas de segmentação válidas
+- indústria
+- país
+
+Uma decisão importante foi restringir a consulta às listas de segmentação relevantes para o problema, reduzindo o universo de busca e aproximando o resultado das regras de negócio reais. Isso trouxe dois ganhos: melhor performance e maior aderência à realidade operacional.
+
+Também foi implementado um mecanismo de cache por país. Quando a consulta já foi executada anteriormente para um determinado código de país, o resultado é salvo em arquivo e pode ser reutilizado em execuções futuras, evitando reconsultas desnecessárias ao banco e reduzindo o tempo de processamento.
+
+#### 2.2 Normalização textual
+
+O segundo desafio foi tratar a inconsistência dos nomes das empresas no input e na base interna. Nomes como:
+
+- `Alpha Industries Management, Inc.`
+- `Alstom Signaling Operation, LLC`
+- `Alter Trading Corporation`
+
+podem existir no banco em diferentes formatos, sem vírgula, sem “Inc.”, sem “LLC” ou com pequenas alterações que não mudam a identidade da empresa.
+
+Para lidar com isso, foi criada uma rotina de normalização textual. Essa rotina:
+- converte os nomes para minúsculas
+- remove pontuação
+- elimina termos societários comuns, como “Inc”, “LLC”, “Corp”, “Ltda”, “Group”, entre outros
+- reduz espaços extras
+
+A normalização não substitui a comparação bruta, mas complementa a análise. Essa foi uma decisão importante do projeto: preservar tanto o nome original quanto o nome normalizado, em vez de depender apenas de um formato tratado.
+
+#### 2.3 Estratégia de matching
+
+O terceiro desafio foi comparar nomes de forma robusta, evitando tanto falsos negativos quanto falsos positivos.
+
+A solução adotada utiliza duas abordagens complementares:
+
+**Raw matching**  
+Compara o nome original da empresa fornecida no input com o nome legal original do cliente na base.
+
+**Normalized matching**  
+Compara as versões normalizadas dos dois nomes.
+
+A execução ocorre em duas etapas:
+1. primeiro é feito o raw matching
+2. depois, quando necessário, é feito o normalized matching
+
+Esse desenho foi importante porque permitiu capturar casos de igualdade textual forte sem abrir mão de uma segunda camada mais flexível para tratar variações.
+
+Para o cálculo de similaridade, foi utilizado fuzzy matching. O algoritmo gera scores de similaridade entre os nomes e registra candidatos conforme faixas de confiança:
+- candidatos de alta confiança: score igual ou maior que 80 durante a geração
+- candidatos de fallback: matches normalizados entre 60 e 80 quando não há match normalizado mais forte
+
+Essa abordagem é especialmente importante para evitar problemas de substring simples. Um exemplo clássico é o caso de “AON”. Se fosse usada apenas uma busca por trecho, resultados como “Kaonmedia” poderiam aparecer como candidatos indevidos. O uso de similaridade textual com critérios adicionais reduz esse risco.
+
+#### 2.4 Agrupamento por regras de negócio
+
+Uma parte essencial da modelagem foi estruturar o problema em grupos de contas com regras de saída e prioridade diferentes. Em vez de tratar toda a base da mesma forma, os registros foram organizados em quatro grupos:
+
+**Grupo 1**
+- Enterprise Client Expansion
+- Enterprise Non-Client Expansion
+- Strategic Non-Client Expansion
+- Strategic Client Expansion
+
+**Grupo 2**
+- Horizon EMEA
+- Horizon - non-EMEA
+
+**Grupo 3**
+- Activate
+- Growth
+- BP WW CEID
+
+**Grupo 4**
+- Activate Unassigned
+
+Os Grupos 1 e 2 retornam resultados em nível de **COV_TYPE_ID**, pois nesse contexto o nível de cobertura é o mais apropriado para recomendação.
+
+Os Grupos 3 e 4 retornam principalmente em nível de **GBL_BUY_GRP**, com tratamento especial para alguns casos específicos em que a melhor forma de exibição é **DOM_BUY_GRP**.
+
+Essa separação foi uma das principais evoluções do projeto, pois permitiu refletir melhor as regras reais de segmentação da IBM e organizar a lógica de decisão de forma mais clara.
+
+#### 2.5 Regras de priorização
+
+Após gerar todos os candidatos, a ferramenta precisa recomendar um resultado final por empresa no Summary. Para isso, foi criada uma lógica de priorização baseada nos grupos e na confiança dos scores.
+
+A ordem atual de priorização é:
+1. Grupo 1 e Grupo 2 com probabilidade maior ou igual a 90
+2. Grupo 3 com probabilidade maior ou igual a 90
+3. Grupo 4 com probabilidade maior ou igual a 90
+4. melhor candidato entre 50 e 90
+5. cliente não encontrado
+
+Nos Grupos 3 e 4, quando múltiplos candidatos de alta confiança existem para a mesma conta, a ferramenta prioriza registros em nível de **GBL_BUY_GRP** quando disponíveis. Caso existam múltiplos Global Client IDs para a mesma conta, os registros são consolidados em uma única linha no Summary com a mensagem:
+
+`Multiple Global Client IDs - check Details tab`
+
+Essa decisão evita poluir o resumo final e direciona a revisão para a aba de detalhes quando necessário.
+
+#### 2.6 Estrutura de saída
+
+A ferramenta produz três abas principais:
+
+**Details**  
+Contém todos os candidatos encontrados pelo motor de matching, com score, nível da conta, atributos de cobertura, buying group, global client, grupo de origem e lista de segmentação.
+
+**Summary**  
+Contém a recomendação final por empresa, respeitando as regras de prioridade.
+
+**Metrics**  
+Contém métricas de execução e qualidade, como:
+- número de empresas processadas
+- empresas encontradas e não encontradas
+- percentuais de cobertura
+- distribuição de matches por grupo
+- quantidade de matches com alta confiança
+- empresas com múltiplos resultados
+- tempo total de execução
+- tempo por grupo
+- tempo por empresa processada
+
+Além disso, o Summary possui realces visuais para facilitar a revisão:
+- **amarelo**: cliente não encontrado
+- **azul claro**: empresas com múltiplas linhas no summary
+- **laranja claro**: registros de Activate Unassigned
+
+No caso de **Activate Unassigned**, foi incluída uma observação importante no projeto: entradas classificadas nesse grupo demandam etapas adicionais para garantir o fluxo correto de achievement e pagamento.
+
+#### 2.7 Desafios enfrentados e soluções encontradas
+
+Ao longo da execução do projeto, alguns desafios importantes surgiram:
+
+**1. Diferença entre matching bruto e matching normalizado**  
+Em uma versão inicial, a análise considerada como “raw” ainda estava sendo executada sobre nomes normalizados, o que eliminava parte do valor da dupla abordagem. Esse problema foi corrigido ao separar explicitamente as estruturas de comparação para nome bruto e nome normalizado.
+
+**2. Duplicidade de resultados**  
+Como os candidatos podiam surgir a partir de mais de uma etapa de matching, houve necessidade de criar uma estratégia de deduplicação com base em atributos-chave do resultado.
+
+**3. Organização do código**  
+A primeira versão concentrava muitas responsabilidades no arquivo principal. Ao longo da evolução, a solução foi modularizada em arquivos separados para configuração, execução, métricas, preparação de dados, matching, summary e acesso ao banco, tornando o projeto mais limpo e mais sustentável.
+
+**4. Performance**  
+Foi implementado benchmark entre execução sequencial e paralela. O resultado mostrou que, no ambiente testado, a execução sequencial apresentou melhor desempenho total do que a paralela. Isso indicou que o workload do projeto é predominantemente CPU-bound, e que o overhead de threads superava os ganhos potenciais de concorrência. A partir disso, a execução sequencial passou a ser o modo padrão, mantendo o benchmark como opção.
+
+**5. Representação das regras de negócio**  
+Outro desafio foi traduzir corretamente as regras de priorização da IBM para uma lógica programável. A solução encontrada foi estruturar os grupos com configuração centralizada e regras explícitas no resumo final.
+
+### 3. Resultados
+
+O principal resultado do projeto foi transformar um processo altamente manual e distribuído em uma solução automatizada, estruturada e orientada por regras de negócio.
+
+A ferramenta consegue:
+- receber uma lista de empresas e um país
+- extrair a base relevante do banco
+- normalizar nomes
+- gerar candidatos com fuzzy matching
+- aplicar priorização por grupos de negócio
+- recomendar uma saída final por empresa
+- destacar visualmente casos que exigem atenção
+- produzir métricas de execução e qualidade
+
+Do ponto de vista operacional, isso representa uma redução significativa do esforço manual. Em vez de exigir busca individual e análise isolada para cada empresa, a ferramenta entrega um conjunto estruturado de candidatos e uma recomendação inicial, permitindo que o analista concentre seu tempo apenas nos casos ambíguos ou excepcionais.
+
+Do ponto de vista de qualidade, a solução traz mais consistência. O processo deixa de depender exclusivamente da interpretação individual de cada analista e passa a seguir regras padronizadas, replicáveis e documentadas.
+
+Do ponto de vista analítico, a inclusão da aba de métricas também trouxe valor adicional. A partir dela, passou a ser possível medir:
+- percentual de empresas encontradas
+- percentual de empresas não encontradas
+- percentual de matches por grupo
+- quantidade de resultados com alta confiança
+- empresas com múltiplos resultados no Summary
+- tempo por empresa processada
+
+Esses indicadores permitem avaliar tanto a eficiência da execução quanto a qualidade das recomendações geradas.
+
+Mesmo quando a ferramenta não consegue decidir automaticamente uma única resposta ideal, ela ainda gera valor relevante ao reduzir o universo de busca e apresentar os candidatos mais plausíveis de forma organizada, deixando claro onde há conflito e onde a revisão humana é necessária.
+
+### 4. Conclusões
+
+Este trabalho demonstrou que conceitos de sistemas inteligentes de apoio à decisão podem ser aplicados com impacto direto em um processo corporativo real, complexo e sensível para o negócio.
+
+A ferramenta proposta endereça um problema crítico no contexto de aquisições: a correta identificação e classificação de clientes para composição de territórios comerciais. Essa etapa, embora operacional em aparência, tem impacto estratégico na definição de metas, no alinhamento dos planos de venda e na integridade do fluxo de comissão.
+
+Como contribuição prática, o projeto oferece uma solução que reduz drasticamente o esforço manual, melhora a consistência do processo, acelera decisões e cria uma base estruturada para evolução contínua.
+
+Como contribuição técnica, o projeto integra:
+- conexão com IBM DB2
+- extração estruturada de dados
+- normalização textual
+- fuzzy matching
+- regras hierárquicas de priorização
+- mensuração de performance e qualidade
+- output estruturado para decisão
+
+Como contribuição acadêmica, o trabalho mostra como combinar tratamento de dados, lógica de negócio e critérios de decisão em uma ferramenta aplicada a um contexto real de apoio à decisão.
+
+Entre as limitações e próximos passos, destacam-se:
+- refinamento contínuo das regras de priorização
+- ampliação do conjunto de métricas
+- criação de amostras validadas para medir precisão de forma mais formal
+- possível incorporação de abordagens mais avançadas de NLP para melhorar o tratamento de ambiguidades
+- evolução da camada de apresentação para facilitar o uso por mais analistas
+
+Em síntese, o projeto mostra que é possível transformar um processo manual, demorado e sujeito a inconsistências em um fluxo mais inteligente, mensurável, escalável e alinhado às necessidades do negócio.
+
+---
+
+Matrícula: 232100499
+
+Pontifícia Universidade Católica do Rio de Janeiro
+
+Curso de Pós Graduação *Business Intelligence Master*
