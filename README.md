@@ -286,6 +286,10 @@ A apresentação da solução no meio corporativo resultou em duas decisões:
 - Aplicação prática imediata
 - Estudo inicial para simplificação do processo e potencial migração para SAP
 
+### 5. Referências
+
+Arquivos de solicitação e aplicação real armazenados em: https://github.com/leopcdata/bimaster_final/tree/main/results
+
 ---
 
 Matrícula: 232100499
