@@ -284,7 +284,7 @@ A apresentação da solução no meio corporativo resultou em duas decisões:
 
 ### 6. Referências
 
-Arquivos de solicitação e aplicação real armazenados na pasta [Results]([https://github.com/leopcdata](https://github.com/leopcdata/bimaster_final/tree/main/results)   
+Arquivos de solicitação e aplicação real armazenados na pasta [Results](https://github.com/leopcdata/bimaster_final/tree/main/results)   
 
 Output da execução no VS code:
 
