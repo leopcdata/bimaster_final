@@ -9,9 +9,9 @@ Trabalho apresentado ao curso [BI MASTER](https://ica.puc-rio.ai/bi-master) como
 
 ### Resumo
 
-Este trabalho apresenta o desenvolvimento de uma ferramenta em Python de apoio à decisão para automatizar e padronizar o processo de identificação e classificação de clientes no contexto de integração de empresas adquiridas em uma grande organização global. O problema surgiu a partir da aceleração da estratégia de aquisições e da redução do prazo de integração para menos de um ano, o que aumentou significativamente a pressão sobre processos operacionais da área de Sales Compensation.
+Este trabalho apresenta o desenvolvimento de uma ferramenta em Python de apoio à decisão para automatizar e padronizar o processo de identificação e classificação de clientes no contexto de integração de empresas adquiridas (Mergers & Acquistions) em uma grande organização global. O problema surgiu a partir da aceleração da estratégia de aquisições e da redução do prazo de integração para menos de um ano, o que aumentou significativamente a pressão sobre processos operacionais da área de Sales Compensation.
 
-Nesse contexto, a correta configuração dos territórios comerciais é essencial para a definição dos planos de venda, cálculo de metas e pagamento de comissões. No caso de vendedores oriundos de aquisições, um dos passos críticos da integração consiste em mapear corretamente os clientes que passarão a compor seus territórios. Atualmente, esse processo é realizado manualmente, com base em planilhas enviadas pelos gestores de vendas contendo milhares de empresas, exigindo busca individual em uma base corporativa com milhões de registros ativos e análise da posição hierárquica de cada cliente dentro da estrutura comercial da organização.
+Nesse contexto, a correta configuração dos territórios como parte do contrato assinado por cada vendedos é essencial para a definição dos planos de venda, cálculo de metas e pagamento de comissões. No caso de vendedores oriundos de aquisições, um dos passos críticos da integração consiste em mapear corretamente os clientes que passarão a compor seus territórios. Atualmente, esse processo é realizado manualmente, com base em planilhas enviadas pelos gestores de vendas contendo milhares de empresas, exigindo busca individual em uma base corporativa com milhões de registros ativos e análise da posição hierárquica de cada cliente dentro da estrutura comercial da organização.
 
 A complexidade do processo decorre de diferentes fatores: variações de grafia, abreviações, sufixos societários, nomes fantasia, dados antigos ainda ativos na base e múltiplos níveis hierárquicos de segmentação comercial. A solução proposta utiliza extração de dados em DB2, normalização textual, fuzzy matching, regras de priorização por grupos de contas e geração de saídas estruturadas para apoiar a tomada de decisão. Como resultado, a ferramenta busca reduzir drasticamente o esforço manual, aumentar a consistência do processo, melhorar a acurácia do mapping e acelerar a integração comercial de empresas adquiridas.
 
@@ -37,7 +37,7 @@ Além do volume, há também um problema de qualidade e ambiguidade dos dados. O
 
 Outro fator que torna a tarefa ainda mais complexa é que o analista não precisa apenas encontrar um nome semelhante. Ele precisa decidir em qual mercado e em qual nível da segmentação comercial aquela conta se encontra. Em outras palavras, o problema não é somente “qual registro parece mais com esse nome?”, mas sim “qual é o nível hierárquico mais adequado para configurar corretamente o território do vendedor?”.
 
-Esse ponto é especialmente relevante porque a estrutura comercial utilizada pela organização não é plana. Em 2026, os clientes estão distribuídos em quatro grandes segmentos, que refletem diferentes níveis de dedicação comercial:
+Esse ponto é especialmente relevante porque a estrutura comercial utilizada pela organização não é plana. Em 2026, os clientes estão distribuídos em quatro grandes segmentos (Go-to-Market), que refletem diferentes níveis de dedicação comercial:
 
 - **Enterprise**
 - **Strategic**
@@ -62,7 +62,11 @@ A modelagem da solução foi construída em etapas, buscando refletir o processo
 
 #### 2.1 Extração de dados
 
-O primeiro desafio do projeto foi acessar diretamente a base corporativa usada como referência para o mapping. Para isso, foi criada uma conexão com DB2, permitindo a execução de uma SQL capaz de trazer clientes ativos, já aplicando filtros de aprovação, validade e segmentação relevantes para o processo.
+•	Uso combinado de Python and SQL para extração de dados
+•	Cache local por país para reduzir a quantidade de consultas em SQL e melhorar a performance.*
+•	Parâmetros de buscas a nível de país
+
+Quando um país é executado pela primeira vez, há conexão ao Banco de dados por meio extração por consulta SQL e armazenamento local. Quando a consulta já foi executada anteriormente para um determinado código de país, a consulta é feita diretamente ao arquivo cache anteriormente criado, evitando reconsultas desnecessárias ao banco e reduzindo o tempo de processamento. Isso foi feito considerando que esses dados são definidos para todo ano e não podem ser alterados, salvo exceções.
 
 A consulta retorna, entre outros campos:
 - identificador e nome da cobertura
@@ -73,25 +77,12 @@ A consulta retorna, entre outros campos:
 - indústria
 - país
 
-Uma decisão importante foi restringir a consulta às listas de segmentação relevantes para o problema, reduzindo o universo de busca e aproximando o resultado das regras reais do processo. Isso trouxe dois ganhos: melhor performance e maior aderência ao contexto operacional.
-
-Também foi implementado um mecanismo de cache por país. Quando a consulta já foi executada anteriormente para um determinado código de país, o resultado é salvo em arquivo e pode ser reutilizado em execuções futuras, evitando reconsultas desnecessárias ao banco e reduzindo o tempo de processamento.
-
 #### 2.2 Normalização textual
 
-O segundo desafio foi tratar a inconsistência dos nomes das empresas no input e na base interna. Nomes como:
-
-- `Alpha Industries Management, Inc.`
-- `Alstom Signaling Operation, LLC`
-- `Alter Trading Corporation`
-
-podem existir na base em diferentes formatos, sem vírgula, sem “Inc.”, sem “LLC” ou com pequenas alterações que não mudam a identidade principal da empresa.
-
-Para lidar com isso, foi criada uma rotina de normalização textual. Essa rotina:
-- converte os nomes para minúsculas
-- remove pontuação
-- elimina termos societários comuns, como “Inc”, “LLC”, “Corp”, “Ltda”, “Group”, entre outros
-- reduz espaços extras
+O segundo desafio foi tratar a inconsistência dos nomes das empresas no input e na base interna. Para lidar com isso, foi criada uma rotina de normalização textual por meio de:
+•	conversão para minúsculas
+•	remoção de espaços extras e pontuação
+•	remoção de termos societários comuns, como “Inc”, “LLC”, “Corp”, “Ltda”, “Group”, e palavras irrelevantes no contexto (stopwords)
 
 A normalização não substitui a comparação bruta, mas complementa a análise. Essa foi uma decisão importante do projeto: preservar tanto o nome original quanto o nome normalizado, em vez de depender apenas de um formato tratado.
 
@@ -113,11 +104,14 @@ A execução ocorre em duas etapas:
 
 Esse desenho foi importante porque permitiu capturar casos de igualdade textual forte sem abrir mão de uma segunda camada mais flexível para tratar variações.
 
-Para o cálculo de similaridade, foi utilizado fuzzy matching. O algoritmo gera scores de similaridade entre os nomes e registra candidatos conforme faixas de confiança:
+Para o cálculo de similaridade, foi utilizado fuzzy matching (biblioteca RapidFuzz) como técnica de comparação aproximada de strings para medir a similaridade entre textos mesmo quando há variações, erros de digitação ou diferenças de formatação. O algoritmo gera scores de similaridade de 0 - 100 entre os nomes e registra candidatos conforme faixas de confiança. Nesta aplicação, ela compara o Nome da Empresa de entrada com os Nomes Legais dos Clientes.
 - candidatos de alta confiança: score igual ou maior que 80 durante a geração
 - candidatos de fallback: matches normalizados entre 60 e 80 quando não há match normalizado mais forte
 
 Essa abordagem é especialmente importante para evitar problemas de substring simples. Um exemplo clássico é o caso de “AON”. Se fosse usada apenas uma busca por trecho, resultados como “Kaonmedia” poderiam aparecer como candidatos indevidos. O uso de similaridade textual com critérios adicionais reduz esse risco.
+
+Outros desafios ainda persistem, como no exemplo de entrada -  'As America, Inc' que retorna pontuações semelhantes encontradas para: 'Asm America' e 'JAS America'. Isso abre espaço para pontos de melhoria e criações de regras adicionais, considerando tanto os parâmetros hierárquicos do negócio como técnicas adicionais de comparação de string.
+
 
 #### 2.4 Agrupamento por regras de negócio
 
