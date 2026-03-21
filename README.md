@@ -17,41 +17,37 @@ This study presents the development of a decision-support tool designed to suppo
 
 ### 1. Introdução
 
-Atuo na área de Sales Compensation de uma empresa global de tecnologia, responsável por processos relacionados à definição de planos de vendas, administração de territórios e cálculo de comissões. Nesse contexto, a correta associação entre clientes e territórios comerciais é um elemento central, uma vez que impacta diretamente a definição de metas, a elegibilidade das vendas e a remuneração variável dos vendedores.
+Atuo no departamento de Sales Compensation de uma empresa global de tecnologia, responsável por processos relacionados à definição de planos de vendas, administração de territórios comerciais e cálculo de comissões. Nesse contexto, a correta associação entre clientes e territórios comerciais é um elemento central, uma vez que impacta diretamente a definição de metas, a elegibilidade das vendas e a remuneração variável dos vendedores.
 
-Nos últimos anos, a companhia intensificou sua estratégia de crescimento por aquisições, ao mesmo tempo em que reduziu o prazo esperado para integração das empresas adquiridas. Esse movimento ampliou a necessidade de incorporar novos vendedores e suas carteiras de clientes de forma ágil e estruturada aos sistemas corporativos. Entre as etapas mais críticas desse processo está o mapeamento das empresas informadas pelos gestores para a base comercial oficial da organização, utilizada como referência para a configuração de territórios.
+Nos últimos anos, a companhia intensificou sua estratégia de crescimento por aquisições, mais de 30 nos últimos 5 anos, e ao mesmo tempo em que reduziu o prazo esperado para integração das empresas adquiridas. Esse movimento ampliou a necessidade de incorporar novos vendedores e suas carteiras de clientes de forma ágil e estruturada aos sistemas corporativos. Entre as etapas mais críticas desse processo está o mapeamento das empresas informadas pelos gestores para a base comercial da organização, utilizada como referência para a configuração de áreas de cobertura individuais.
 
-Atualmente, esse mapeamento é realizado de forma predominantemente manual. Os analistas precisam consultar individualmente cada empresa recebida em planilhas de entrada, confrontando essas informações com uma base corporativa composta por milhões de registros ativos. Além do elevado volume de dados, a atividade é dificultada pela ausência de padronização textual nos nomes das empresas, que frequentemente apresentam abreviações, siglas, variações ortográficas, sufixos societários e diferenças de formatação.
+Atualmente, esse mapeamento é realizado de forma predominantemente manual. Os analistas do setor precisam consultar individualmente cada empresa recebida em planilhas de entrada, confrontando essas informações com uma base corporativa composta por milhões de registros ativos. Além do elevado volume de dados, a atividade é dificultada pela ausência de padronização textual nos nomes das empresas informados, que frequentemente apresentam abreviações, siglas, variações ortográficas, sufixos societários e diferenças de formatação.
 
-A complexidade do processo, entretanto, não se limita à comparação textual. A decisão final também depende da correta interpretação da hierarquia comercial e do segmento de negócio mais adequado para cada cliente, o que exige conhecimento operacional e análise contextual. Em uma integração recente, essa etapa demandou aproximadamente uma semana de trabalho de uma equipe de cerca de dez pessoas, evidenciando a baixa escalabilidade e o alto esforço operacional do modelo atual.
+A complexidade do processo, entretanto, não se limita à comparação textual. A decisão final também depende da correta interpretação da hierarquia comercial e do segmento de negócio mais adequado para cada cliente seguindo o modelo de Go-to-Market da empresa, o que exige conhecimento operacional e análise contextual. Em uma integração realizada ano passado, essa etapa demandou aproximadamente uma semana de trabalho de uma equipe de cerca de dez pessoas, evidenciando a baixa escalabilidade e o alto esforço operacional do modelo atual.
 
 Diante desse cenário, este trabalho propõe o desenvolvimento de uma ferramenta de apoio à decisão voltada à automatização parcial do processo de mapeamento de clientes. A solução busca reduzir o esforço manual, aumentar a consistência das recomendações e tornar o processo de integração mais eficiente, confiável e escalável.
 
 ### 2. Regras de Negócio
 
-Esse aspecto é especialmente relevante porque a estrutura comercial da organização não é plana. Em 2026, os clientes estão distribuídos em quatro grandes segmentos de Go-to-Market, que refletem diferentes níveis de dedicação comercial:
+Antes de seguir com a modelagem, importante evidenciar a estrutura hierárquia dos clientes da empresa. Em 2026, os clientes estão distribuídos dentro quatro segmentos que refletem diferentes níveis de dedicação comercial, estratégia de vendas e comissão:
 
 - **Enterprise**
 - **Strategic**
 - **Select Horizon**
 - **Select Territory**
 
-Nos segmentos Enterprise, Strategic e Select Horizon, clientes de maior relevância costumam estar associados a estruturas de cobertura mais dedicadas, muitas vezes representadas por um identificador específico. Já no segmento Select Territory, é comum que milhares de clientes sejam agrupados em estruturas mais amplas, definidas por critérios como geografia, indústria ou pela combinação de ambos.
+Nos segmentos Enterprise, Strategic e Select Horizon, clientes de maior relevância costumam estar associados a estruturas de cobertura mais dedicadas, muitas vezes representadas por um identificador específico. Já no segmento Select Territory, é comum que milhares de clientes sejam agrupados em estruturas mais amplas, definidas por critérios como geografia, indústria ou pela combinação de ambos. São contas menores onde se busca um maior crescimento.
 
 A cobertura constitui um dos principais elementos utilizados na definição dos territórios de vendas. Em alguns casos, ela representa praticamente um cliente individual; em outros, corresponde a agrupamentos de dezenas ou até milhares de clientes. Por esse motivo, a decisão de mapeamento vai além da similaridade textual entre nomes, exigindo também a identificação do nível mais adequado dentro da hierarquia comercial.
 
-Grandes clientes, em geral, possuem hierarquias dedicadas. Assim, quando a busca retorna simultaneamente uma estrutura específica de um grande grupo econômico e uma estrutura mais genérica de mercado ou indústria, a recomendação adequada deve priorizar a estrutura dedicada. Essa escolha é importante para garantir que o vendedor receba corretamente pelas oportunidades relacionadas a toda a organização e suas afiliadas, e não apenas por uma classificação ampla e genérica.
-
-Do ponto de vista de negócio, esse mapeamento é altamente crítico. Os planos de vendas são definidos no início do ano e, após sua oferta, só podem ser modificados em condições bastante específicas. Esses planos são compostos, de forma geral, pelos clientes sob responsabilidade do vendedor e pelos produtos que ele deve comercializar. A partir dessas definições, o sistema calcula metas com base no histórico dos clientes e na estratégia de crescimento. Dessa forma, a correta atribuição do cliente desde a origem é essencial, pois a inclusão posterior de clientes ou metas ao longo do ano pode ser interpretada como manipulação de comissão.
+A modelage deve sempre deve priorizar a estrutura de maior importância, quando uma busca retornar resultados em diferentes segmentos para uma mesma entrada. Do ponto de vista de negócio, esse mapeamento é altamente crítico. Os planos de vendas são definidos no início do ano e, após sua oferta, só podem ser modificados em condições bastante específicas. Esses planos são compostos, de forma geral, pelos clientes sob responsabilidade do vendedor e pelos produtos que ele deve comercializar. A partir dessas definições, o sistema calcula metas com base no histórico dos clientes e na estratégia de crescimento. 
 
 ### 3. Modelagem
-A modelagem da solução foi estruturada para reproduzir, de forma padronizada e escalável, a etapa inicial do processo de integração de vendedores oriundos de aquisições. Na prática, esse processo começa quando um gerente de vendas envia uma lista de clientes que devem ser incorporados ao território do vendedor e, em muitos casos, também ao território de seu time. Essa lista normalmente contém apenas os nomes das empresas, sem padronização e sem referência direta aos identificadores utilizados na base corporativa. A partir dessa entrada, iniciam-se as etapas críticas do fluxo.
+A modelagem da solução foi estruturada para reproduzir, de forma padronizada e escalável, a etapa inicial do processo de integração de vendedores oriundos de aquisições. Na prática, esse processo começa quando um gerente de vendas envia uma lista de clientes que devem ser incorporados ao território de sua equipe. Essa lista normalmente contém apenas os nomes das empresas, sem padronização e sem referência direta aos identificadores utilizados na base corporativa. A partir dessa entrada, iniciam-se as etapas críticas do fluxo.
 
 Diante desse cenário, a solução proposta neste trabalho consiste em uma ferramenta em Python de apoio à decisão, desenvolvida para automatizar a parte mais custosa desse processo: a busca inicial na base, a comparação textual entre nomes, a classificação preliminar dos candidatos e sua priorização para análise final do analista. A ferramenta não elimina a validação final humana, mas reduz significativamente o esforço manual e aumenta a consistência da etapa de triagem.
 
-A modelagem da solução foi construída em etapas, buscando refletir o processo real executado pelos analistas, mas de forma estruturada, mensurável e reproduzível.
-
-Exemplo de entrada do processo:
+Exemplo de entrada do processo - Lista fornecida por um gestor:
 
 <img width="539" height="303" alt="image" src="https://github.com/user-attachments/assets/c4cf4bff-5df9-435f-a7b4-e5f035105f13" />
 
@@ -64,7 +60,7 @@ A partir da lista de clientes recebida, a primeira etapa da solução consiste n
 - parametrização da busca em nível de país, limitando o conjunto de registros analisados;
 - utilização de cache local por país, com o objetivo de reduzir consultas repetidas ao banco e melhorar a performance.
 
-Quando um país é processado pela primeira vez, a ferramenta estabelece conexão com o banco de dados, executa a consulta SQL correspondente e armazena o resultado localmente. Quando esse mesmo país já foi executado anteriormente, a leitura passa a ser feita diretamente a partir do arquivo de cache gerado, evitando reconsultas desnecessárias ao banco e reduzindo o tempo total de processamento. Essa abordagem é adequada ao contexto do projeto, pois esses dados são definidos para o ano corrente e tendem a permanecer estáveis, exceto em situações pontuais.
+Quando os dados de um país é processado pela primeira vez, o código estabelece conexão com o banco de dados, executa a consulta SQL correspondente e armazena o resultado localmente. Quando esse mesmo país já foi executado anteriormente, a leitura passa a ser feita diretamente a partir do arquivo de cache gerado em csv, evitando reconsultas desnecessárias ao banco e reduzindo o tempo total de processamento. Essa abordagem é adequada ao contexto do projeto, pois esses dados são definidos para o ano corrente e tendem a permanecer estáveis, exceto em situações pontuais.
 
 A consulta retorna, entre outros, os seguintes campos:
 
@@ -94,23 +90,21 @@ A normalização inclui:
 A normalização não substitui a comparação com o texto original, mas atua como uma camada complementar de apoio ao matching. Por esse motivo, o projeto preserva tanto o nome original quanto sua versão normalizada, permitindo que a análise considere simultaneamente a forma bruta recebida no input e uma representação mais padronizada.
 
 #### 3.3 Estratégia de matching
-A estratégia de matching foi estruturada em duas abordagens complementares, de forma a equilibrar precisão textual e flexibilidade no tratamento de variações de escrita.
+A estratégia de matching foi estruturada em duas abordagens complementares e sequencias, de forma a equilibrar precisão textual e flexibilidade no tratamento de variações de escrita.
 
 -Raw matching: compara o nome original da empresa informado no input com o nome legal original do cliente na base;
--Normalized matching: compara as versões normalizadas dos dois nomes.
-
-A execução ocorre em duas etapas, inicialmente é realizado o raw matching e em seguida, quando necessário, é aplicado o normalized matching.
+-Normalized matching: compara as versões normalizadas dos dois nomes, quando necessário.
 
 Esse desenho foi importante porque permite capturar casos de forte correspondência textual já na comparação direta, sem abrir mão de uma segunda camada mais flexível para tratar abreviações, sufixos societários, diferenças de grafia e pequenas variações de formatação.
 
-Para o cálculo de similaridade, foi utilizada a biblioteca RapidFuzz, em Python, especializada em comparação aproximada de strings. A técnica de fuzzy matching permite medir o grau de similaridade entre textos mesmo quando há erros de digitação, variações ortográficas ou diferenças de estrutura. Nesta aplicação, a comparação é feita entre o nome da empresa informado no input e os nomes legais dos clientes disponíveis na base.
+Para o cálculo de similaridade, foi utilizada a biblioteca RapidFuzz, em Python, especializada em comparação aproximada de strings. A técnica de fuzzy matching permite medir o grau de similaridade de 0 a 100 entre textos mesmo quando há erros de digitação, variações ortográficas ou diferenças de estrutura. Nesta aplicação, a comparação é feita entre o nome da empresa informado no input e os nomes legais dos clientes disponíveis na base.
 
 Os resultados são classificados conforme faixas de confiança, incluindo:
 
 -candidatos de alta confiança: score maior ou igual a 80 durante a geração;
 - candidatos de fallback: scores entre 60 e 80, utilizados quando não há correspondência mais forte na comparação normalizada.
 
-Essa abordagem é particularmente importante para evitar distorções típicas de buscas simples por substring. Um exemplo é o termo “AON”: se a busca considerasse apenas ocorrência parcial de texto, nomes como “Kaonmedia” poderiam surgir indevidamente como candidatos. O uso de similaridade textual, combinado com critérios adicionais, reduz esse risco e melhora a qualidade da recomendação.
+Essa técnica ajuda a evitar distorções típicas de buscas simples por substring, uma alternativa usada anteriormente por meio de SQL. Dando como exemplo a empresa “AON” - se a busca considerasse apenas ocorrência parcial de texto, nomes como “Kaonmedia” poderiam surgir indevidamente como candidatos. O uso de similaridade textual, combinado com critérios adicionais, reduz esse risco e melhora a qualidade da recomendação.
 
 Ainda assim, alguns casos permanecem ambíguos. Um exemplo é a entrada “As America, Inc”, que pode retornar pontuações semelhantes para nomes como “Asm America” e “JAS America”. Situações como essa mostram que ainda há espaço para evolução da solução, seja pela criação de regras adicionais baseadas na hierarquia de negócio, seja pela incorporação de técnicas complementares de comparação textual.
 
@@ -141,6 +135,8 @@ Os Grupos 3 e 4 retornam principalmente em nível de **GBL_BUY_GRP**, com tratam
 
 Essa separação foi uma das principais evoluções do projeto, pois permitiu refletir melhor as regras de segmentação comercial e organizar a lógica de decisão de forma mais clara.
 
+Os termos COV_TYPE_ID, GBL_GRP_ID, DOM_BUY_GRP são a forma que a empresa classifica seus clientes. Dando como exemplo a PEPSI. Podemos classificar a organização PepsiCo como a estrutura principal (COV_TYPE_ID), a divisão entre os setores de bebidas e alimentos como diferentes GBL_BUY_GRP_ID e suas marcas individuais como diferentes DOM_BUY_GRP. Isso permite diferentes coberturas comerciais e classificações para um mesmo conglomerado. 
+
 #### 3.5 Regras de priorização
 
 Após gerar todos os candidatos, a ferramenta precisa recomendar um resultado final por empresa no Summary. Para isso, foi criada uma lógica de priorização baseada nos grupos e na confiança dos scores.
@@ -152,21 +148,17 @@ A ordem atual de priorização é:
 4. melhor candidato entre 50 e 90
 5. cliente não encontrado
 
-Nos Grupos 3 e 4, quando múltiplos candidatos de alta confiança existem para a mesma conta, a ferramenta prioriza registros em nível de **GBL_BUY_GRP** quando disponíveis. Caso existam múltiplos Global Client IDs para a mesma conta, os registros são consolidados em uma única linha no Summary com a mensagem:
-
-`Multiple Global Client IDs - check Details tab`
-
-Essa decisão direciona a revisão humana para a aba de detalhes quando necessário.
+Nos Grupos 3 e 4, quando múltiplos candidatos de alta confiança existem para a mesma conta, a ferramenta prioriza registros em nível de **GBL_BUY_GRP** quando disponíveis. Caso existam múltiplos registros para a mesma conta, os registros são consolidados em uma única linha no Summary com uma mensagem direciona a revisão humana para a aba de detalhes.
 
 #### 3.6 Estrutura de saída
 
 A ferramenta produz três abas principais:
 
-**Details**  
-Contém todos os candidatos encontrados pelo motor de matching, com score, nível da conta, atributos de cobertura, buying group, global client, grupo de origem e lista de segmentação.
-
 **Summary**  
 Contém a recomendação final por empresa, respeitando as regras de prioridade.
+
+**Details**  
+Contém todos os candidatos encontrados pelo motor de matching, com score, nível da conta, atributos de cobertura, buying group, global client, grupo de origem e lista de segmentação.
 
 **Metrics**  
 Contém métricas de execução e qualidade, como:
@@ -183,13 +175,12 @@ Contém métricas de execução e qualidade, como:
 <img width="393" height="194" alt="image" src="https://github.com/user-attachments/assets/49fc9f46-24fb-42c8-aaca-ae46ae8dbe38" />
 <img width="394" height="262" alt="image" src="https://github.com/user-attachments/assets/8ffb9f3f-b657-4ef2-9ac5-a3554a40b7f9" />
 
-
 Além disso, o Summary possui realces visuais para facilitar a revisão:
 - **amarelo**: cliente não encontrado
 - **azul claro**: empresas com múltiplas linhas no summary
 - **laranja claro**: registros de Activate Unassigned
 
-No caso de **Activate Unassigned**, demandam uma atenção importante no projeto: entradas classificadas nesse grupo necessitam etapas adicionais de processo para garantir a ativação dessas contas e consequentemente o pagamento de comissão para o vendedor.
+As empresas classificadas como **Activate Unassigned**, demandam uma atenção importante no projeto já que não são registros ativos no pipeline do ano corrente. Entradas classificadas nesse grupo necessitam etapas adicionais de processo para garantir a ativação dessas contas e consequentemente o pagamento de comissão para o vendedor.
 
 <img width="886" height="250" alt="image" src="https://github.com/user-attachments/assets/af6640f2-4002-476e-9065-bd7802060717" />
 
@@ -214,49 +205,11 @@ Foi implementado benchmark entre execução sequencial e paralela (ThreadPoolExe
 Outro desafio foi traduzir corretamente as regras de priorização da estrutura comercial para uma lógica programável. A solução encontrada foi estruturar os grupos com configuração centralizada e regras explícitas no resumo final, permitindo ajustes futuros com menor esforço.
 
 **6. Variação entre mercados e países**  
-Outro desafio relevante é que a estrutura de cobertura não é universal e pode variar entre países e mercados. Cada unidade geográfica pode definir suas próprias regras e estratégias locais para agrupar clientes, desde que alinhadas ao modelo comercial global. Além disso, a estrutura de cobertura é revisada a cada ciclo de planejamento e depois permanece congelada durante o ciclo de execução. Isso reforça a necessidade de tomar a decisão correta no momento do mapping, já que a configuração inicial do território terá impacto durante todo o período de vigência do plano de venda.
+Outro desafio relevante é que a estrutura de cobertura não é universal e pode variar entre países e mercados. Cada unidade geográfica pode definir suas próprias regras e estratégias locais para agrupar clientes, desde que alinhadas ao modelo comercial global. Além disso, a estrutura de cobertura é revisada a cada planejamento anual e depois permanece congelada durante o ciclo de execução. Isso reforça a necessidade de tomar a decisão correta no momento do mapping, já que a configuração inicial do território terá impacto durante todo o período de vigência do plano de venda.
 
 ### 4. Resultados
 
-O principal resultado do projeto foi transformar um processo altamente manual e distribuído em uma solução automatizada, estruturada e orientada por regras de negócio.
-
-A ferramenta consegue:
-- receber uma lista de empresas e um país
-- extrair a base relevante do banco
-- normalizar nomes
-- gerar candidatos com fuzzy matching
-- aplicar priorização por grupos de negócio
-- recomendar uma saída final por empresa
-- destacar visualmente casos que exigem atenção
-- produzir métricas de execução e qualidade
-
-Do ponto de vista operacional, isso representa uma redução significativa do esforço manual. Em vez de exigir busca individual e análise isolada para cada empresa, a ferramenta entrega um conjunto estruturado de candidatos e uma recomendação inicial, permitindo que o analista concentre seu tempo apenas nos casos ambíguos ou excepcionais.
-
-Do ponto de vista de qualidade, a solução traz mais consistência. O processo deixa de depender exclusivamente da interpretação individual de cada analista e passa a seguir regras padronizadas, replicáveis e documentadas.
-
-Do ponto de vista analítico, a inclusão da aba de métricas trouxe valor adicional. A partir dela, passou a ser possível medir:
-- percentual de empresas encontradas
-- percentual de empresas não encontradas
-- percentual de matches por grupo
-- quantidade de resultados com alta confiança
-- empresas com múltiplos resultados no Summary
-- tempo por empresa processada
-
-Os resultados do projeto mostram que a automação não apenas reduz o esforço de busca e comparação textual, mas também apoia uma decisão mais sofisticada: recomendar o nível mais adequado dentro de uma estrutura comercial hierárquica, na qual diferentes segmentos e coberturas possuem papéis distintos na definição dos territórios.
-
-Mesmo quando a ferramenta não consegue decidir automaticamente uma única resposta ideal, ela ainda gera valor relevante ao reduzir o universo de busca e apresentar os candidatos mais plausíveis de forma organizada, deixando claro onde há conflito e onde a revisão humana é necessária. Há espaço para melhora com a inclusão de outras técnicas de comparação de string, considerando também a estrutura do modelo da empresa.
-
-A presença de registros desatualizados e irrelevantes, como no exemplo abaixo da MGM studios que foi vendida da Disney para Amazon em 2022, embora ambos registros ainda permaneçam no sistema, levou a uma discussão sobre mudança de plataforma.
-
-<img width="975" height="100" alt="image" src="https://github.com/user-attachments/assets/0345b1f9-053f-4c58-b236-8b44f908351e" />
-
-### 5. Conclusões
-
-Este trabalho aplica conceitos de sistemas inteligentes de apoio à decisão diretamente em um processo corporativo real, complexo e sensível para o negócio.
-
-A ferramenta proposta endereça um problema crítico no contexto de aquisições: a correta identificação e classificação de clientes para composição de territórios comerciais. Essa etapa, embora operacional em aparência, tem impacto estratégico na definição de metas, no alinhamento dos planos de venda e na integridade do fluxo de comissão.
-
-Como contribuição prática, o projeto oferece uma solução que reduz drasticamente o esforço manual, melhora a consistência do processo, acelera decisões e cria uma base estruturada para evolução contínua.
+O principal resultado do projeto foi transformar um processo altamente manual e distribuído em uma solução automatizada, estruturada e orientada por regras de negócio, aplicando conceitos de sistemas inteligentes de apoio à decisão diretamente em um processo corporativo real, complexo e sensível para o negócio.
 
 Como contribuição técnica, o projeto integra:
 - conexão com DB2
@@ -267,7 +220,9 @@ Como contribuição técnica, o projeto integra:
 - mensuração de performance e qualidade
 - output estruturado para decisão
 
-Como contribuição acadêmica, o trabalho mostra como combinar tratamento de dados, lógica de negócio e critérios de decisão em uma ferramenta aplicada a um contexto real de apoio à decisão.
+Os resultados do projeto mostram que a automação não apenas reduz o esforço de busca e comparação textual, mas também apoia uma decisão mais sofisticada: recomendar o nível mais adequado dentro de uma estrutura comercial hierárquica, na qual diferentes segmentos e coberturas possuem papéis distintos na definição dos territórios.
+
+Mesmo quando a ferramenta não consegue decidir automaticamente uma única resposta ideal, ela ainda gera valor relevante ao reduzir o universo de busca e apresentar os candidatos mais plausíveis de forma organizada, deixando claro onde há conflito e onde a revisão humana é necessária. Há espaço para melhoria com a inclusão de outras técnicas de comparação de string, considerando também a estrutura do modelo da empresa.
 
 Entre as limitações e próximos passos, destacam-se:
 - refinamento contínuo das regras de priorização
@@ -276,10 +231,12 @@ Entre as limitações e próximos passos, destacam-se:
 - possível incorporação de abordagens mais avançadas de NLP para melhorar o tratamento de ambiguidades
 - evolução da camada de apresentação para facilitar o uso por mais analistas
 
-Em síntese, o projeto mostra que é possível transformar um processo manual, demorado e sujeito a inconsistências em um fluxo mais inteligente, mensurável, escalável e alinhado às necessidades do negócio.
+Exemplo da presença de registros desatualizados e irrelevantes, a MGM studios foi vendida da Disney para Amazon em 2022, embora ambos registros ainda permaneçam no sistema.
+
+<img width="975" height="100" alt="image" src="https://github.com/user-attachments/assets/0345b1f9-053f-4c58-b236-8b44f908351e" />
 
 A apresentação da solução no meio corporativo resultou em duas decisões:
-- Aplicação prática imediata
+- Aplicação prática imediata como modelo a ser usado pela empresa
 - Estudo inicial para simplificação do processo e potencial migração para SAP
 
 ### 6. Referências
