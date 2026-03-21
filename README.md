@@ -246,6 +246,7 @@ Um exemplo da presença de registros desatualizados e irrelevantes é o cliente 
 Figura 6. Exemplo de dados desatualizados no sistema
 
 
+
 A apresentação da solução no meio corporativo resultou em duas decisões:
 - Adoção imediata como modelo a ser usado pela empresa
 - Estudo inicial para simplificação do processo e potencial migração para SAP
@@ -261,5 +262,7 @@ Figura 7. Terminal de execução no VS code:
 
 ---
 Matrícula: 232100499
+
 Pontifícia Universidade Católica do Rio de Janeiro
+
 Curso de Pós Graduação *Business Intelligence Master*
