@@ -85,7 +85,7 @@ A consulta retorna, entre outros campos:
 - país
 
 Mostrando como exemplo a base de clientes nos EUA apenas, lugar de maior volume de negócios, há registros de 470 mil clientes. Considerando o mundo todo, são milhões de registros.
-- <img width="629" height="334" alt="image" src="https://github.com/user-attachments/assets/032cc20f-c483-49ce-ac72-3153b1de954c" />
+<img width="629" height="334" alt="image" src="https://github.com/user-attachments/assets/032cc20f-c483-49ce-ac72-3153b1de954c" />
 
 
 #### 2.2 Normalização textual
