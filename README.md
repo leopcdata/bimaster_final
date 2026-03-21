@@ -48,7 +48,9 @@ A modelagem da solução foi estruturada para reproduzir, de forma padronizada e
 Diante desse cenário, a solução proposta neste trabalho consiste em uma ferramenta em Python de apoio à decisão, desenvolvida para automatizar a parte mais custosa desse processo: a busca inicial na base, a comparação textual entre nomes, a classificação preliminar dos candidatos e sua priorização para análise final do analista. A ferramenta não elimina a validação final humana, mas reduz significativamente o esforço manual e aumenta a consistência da etapa de triagem.
 
 <img width="539" height="303" alt="image" src="https://github.com/user-attachments/assets/c4cf4bff-5df9-435f-a7b4-e5f035105f13" />
+
 Figura 1. Exemplo de entrada do processo - Lista fornecida por um gestor
+
 
 #### 3.1 Extração de dados
 
@@ -73,7 +75,9 @@ país.
 A importância dessa etapa também se explica pelo volume de dados analisado. Considerando como exemplo a base de clientes dos Estados Unidos mostrada abaixo, que representa o maior volume de negócios, são aproximadamente 470 mil registros. Em escala global, a base contém milhões de registros, o que reforça a necessidade de restringir a busca por país e reutilizar dados já extraídos para garantir viabilidade operacional e melhor desempenho.
 
 <img width="629" height="334" alt="image" src="https://github.com/user-attachments/assets/032cc20f-c483-49ce-ac72-3153b1de954c" />
+
 Figura 2. Total de clientes registrados nos EUA por segmento
+
 
 #### 3.2 Normalização textual
 
@@ -177,6 +181,7 @@ Contém métricas de execução e qualidade, como:
 
 Figuras 3 e 4.  Resultados de métricas
 
+
 Além disso, o Summary possui realces visuais para facilitar a revisão:
 - **amarelo**: cliente não encontrado
 - **azul claro**: empresas com múltiplas linhas no summary
@@ -186,6 +191,7 @@ As empresas classificadas como **Activate Unassigned**, demandam uma atenção i
 
 <img width="886" height="250" alt="image" src="https://github.com/user-attachments/assets/af6640f2-4002-476e-9065-bd7802060717" />
 Figura 5. Exemplo de um resultado prático da aplicação
+
 
 
 #### 3.7 Desafios enfrentados e soluções encontradas
@@ -237,7 +243,8 @@ Entre as limitações e próximos passos, destacam-se:
 Um exemplo da presença de registros desatualizados e irrelevantes é o cliente MGM studios, que foi vendida da Disney para Amazon em 2022, embora ambos registros ainda permaneçam no sistema.
 
 <img width="975" height="100" alt="image" src="https://github.com/user-attachments/assets/0345b1f9-053f-4c58-b236-8b44f908351e" />
-Figura 6. Exemplo de dados desatulizados no sistema
+Figura 6. Exemplo de dados desatualizados no sistema
+
 
 A apresentação da solução no meio corporativo resultou em duas decisões:
 - Adoção imediata como modelo a ser usado pela empresa
