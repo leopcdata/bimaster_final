@@ -188,12 +188,19 @@ Contém métricas de execução e qualidade, como:
 - tempo por grupo
 - tempo por empresa processada
 
+- <img width="393" height="194" alt="image" src="https://github.com/user-attachments/assets/49fc9f46-24fb-42c8-aaca-ae46ae8dbe38" />
+<img width="394" height="262" alt="image" src="https://github.com/user-attachments/assets/8ffb9f3f-b657-4ef2-9ac5-a3554a40b7f9" />
+
+
 Além disso, o Summary possui realces visuais para facilitar a revisão:
 - **amarelo**: cliente não encontrado
 - **azul claro**: empresas com múltiplas linhas no summary
 - **laranja claro**: registros de Activate Unassigned
 
 No caso de **Activate Unassigned**, demandam uma atenção importante no projeto: entradas classificadas nesse grupo necessitam etapas adicionais de processo para garantir a ativação dessas contas e consequentemente o pagamento de comissão para o vendedor.
+
+<img width="886" height="250" alt="image" src="https://github.com/user-attachments/assets/af6640f2-4002-476e-9065-bd7802060717" />
+
 
 #### 2.7 Desafios enfrentados e soluções encontradas
 
@@ -288,7 +295,7 @@ A apresentação da solução no meio corporativo resultou em duas decisões:
 
 ### 5. Referências
 
-Arquivos de solicitação e aplicação real armazenados em: https://github.com/leopcdata/bimaster_final/tree/main/results
+Arquivos de solicitação e aplicação real armazenados na pasta [Results]([https://github.com/leopcdata](https://github.com/leopcdata/bimaster_final/tree/main/results) 
 
 ---
 
