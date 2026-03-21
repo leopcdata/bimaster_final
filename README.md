@@ -47,10 +47,8 @@ A modelagem da solução foi estruturada para reproduzir, de forma padronizada e
 
 Diante desse cenário, a solução proposta neste trabalho consiste em uma ferramenta em Python de apoio à decisão, desenvolvida para automatizar a parte mais custosa desse processo: a busca inicial na base, a comparação textual entre nomes, a classificação preliminar dos candidatos e sua priorização para análise final do analista. A ferramenta não elimina a validação final humana, mas reduz significativamente o esforço manual e aumenta a consistência da etapa de triagem.
 
-Figura 1. Exemplo de entrada do processo - Lista fornecida por um gestor
-
 <img width="539" height="303" alt="image" src="https://github.com/user-attachments/assets/c4cf4bff-5df9-435f-a7b4-e5f035105f13" />
-
+Figura 1. Exemplo de entrada do processo - Lista fornecida por um gestor
 
 #### 3.1 Extração de dados
 
@@ -74,8 +72,8 @@ país.
 
 A importância dessa etapa também se explica pelo volume de dados analisado. Considerando como exemplo a base de clientes dos Estados Unidos mostrada abaixo, que representa o maior volume de negócios, são aproximadamente 470 mil registros. Em escala global, a base contém milhões de registros, o que reforça a necessidade de restringir a busca por país e reutilizar dados já extraídos para garantir viabilidade operacional e melhor desempenho.
 
-Figura 2 - Total de clientes registrados nos EUA por segmento
 <img width="629" height="334" alt="image" src="https://github.com/user-attachments/assets/032cc20f-c483-49ce-ac72-3153b1de954c" />
+Figura 2. Total de clientes registrados nos EUA por segmento
 
 #### 3.2 Normalização textual
 
@@ -173,11 +171,11 @@ Contém métricas de execução e qualidade, como:
 - tempo por grupo
 - tempo por empresa processada
 
-Figuras 3 e 4 - Resultados de métricas
-
 <img width="393" height="194" alt="image" src="https://github.com/user-attachments/assets/49fc9f46-24fb-42c8-aaca-ae46ae8dbe38" />
 
 <img width="394" height="262" alt="image" src="https://github.com/user-attachments/assets/8ffb9f3f-b657-4ef2-9ac5-a3554a40b7f9" />
+
+Figuras 3 e 4.  Resultados de métricas
 
 Além disso, o Summary possui realces visuais para facilitar a revisão:
 - **amarelo**: cliente não encontrado
@@ -186,8 +184,8 @@ Além disso, o Summary possui realces visuais para facilitar a revisão:
 
 As empresas classificadas como **Activate Unassigned**, demandam uma atenção importante no projeto já que não são registros ativos no pipeline do ano corrente. Entradas classificadas nesse grupo necessitam etapas adicionais de processo para garantir a ativação dessas contas e consequentemente o pagamento de comissão para o vendedor.
 
-Figura 5 - Exemplo de um resultado prático da aplicação
 <img width="886" height="250" alt="image" src="https://github.com/user-attachments/assets/af6640f2-4002-476e-9065-bd7802060717" />
+Figura 5. Exemplo de um resultado prático da aplicação
 
 
 #### 3.7 Desafios enfrentados e soluções encontradas
@@ -238,8 +236,8 @@ Entre as limitações e próximos passos, destacam-se:
 
 Um exemplo da presença de registros desatualizados e irrelevantes é o cliente MGM studios, que foi vendida da Disney para Amazon em 2022, embora ambos registros ainda permaneçam no sistema.
 
-Figura 6 - Exemplo de dados desatulizados no sistema
 <img width="975" height="100" alt="image" src="https://github.com/user-attachments/assets/0345b1f9-053f-4c58-b236-8b44f908351e" />
+Figura 6. Exemplo de dados desatulizados no sistema
 
 A apresentação da solução no meio corporativo resultou em duas decisões:
 - Adoção imediata como modelo a ser usado pela empresa
@@ -251,13 +249,10 @@ A apresentação da solução no meio corporativo resultou em duas decisões:
 
 -Código Python nos arquivos main.py, config.py, benchmark.py da pasta principal desse GitHub, e outras funções auxiliares na pasta [utils](https://github.com/leopcdata/bimaster_final/tree/main/utils)
 
--Figura 7 - Terminal de execução no VS code:
-
 <img width="975" height="470" alt="image" src="https://github.com/user-attachments/assets/20f987d0-7eb3-4b40-a00b-441dee1a406f" />
+Figura 7. Terminal de execução no VS code:
+
 ---
-
 Matrícula: 232100499
-
 Pontifícia Universidade Católica do Rio de Janeiro
-
 Curso de Pós Graduação *Business Intelligence Master*
