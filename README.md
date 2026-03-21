@@ -95,8 +95,8 @@ A normalização não substitui a comparação com o texto original, mas atua co
 #### 3.3 Estratégia de matching
 A estratégia de matching foi estruturada em duas abordagens complementares e sequencias, de forma a equilibrar precisão textual e flexibilidade no tratamento de variações de escrita.
 
--Raw matching: compara o nome original da empresa informado no input com o nome legal original do cliente na base;
--Normalized matching: compara as versões normalizadas dos dois nomes, quando necessário.
+- Raw matching: compara o nome original da empresa informado no input com o nome legal original do cliente na base;
+- Normalized matching: compara as versões normalizadas dos dois nomes, quando necessário.
 
 Esse desenho foi importante porque permite capturar casos de forte correspondência textual já na comparação direta, sem abrir mão de uma segunda camada mais flexível para tratar abreviações, sufixos societários, diferenças de grafia e pequenas variações de formatação.
 
@@ -104,7 +104,7 @@ Para o cálculo de similaridade, foi utilizada a biblioteca RapidFuzz, em Python
 
 Os resultados são classificados conforme faixas de confiança, incluindo:
 
--candidatos de alta confiança: score maior ou igual a 80 durante a geração;
+- candidatos de alta confiança: score maior ou igual a 80 durante a geração;
 - candidatos de fallback: scores entre 60 e 80, utilizados quando não há correspondência mais forte na comparação normalizada.
 
 Essa técnica ajuda a evitar distorções típicas de buscas simples por substring, uma alternativa usada anteriormente por meio de SQL. Dando como exemplo a empresa “AON” - se a busca considerasse apenas ocorrência parcial de texto, nomes como “Kaonmedia” poderiam surgir indevidamente como candidatos. O uso de similaridade textual, combinado com critérios adicionais, reduz esse risco e melhora a qualidade da recomendação.
