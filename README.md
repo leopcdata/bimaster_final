@@ -85,10 +85,10 @@ O segundo desafio da solução foi tratar a inconsistência entre os nomes das e
 
 A normalização inclui:
 
--conversão de todo o texto para minúsculas;
--remoção de espaços extras e pontuação;
--remoção de termos societários comuns, como Inc, LLC, Corp, Ltda e Group;
--remoção de palavras pouco relevantes para a identificação, como stopwords.
+- conversão de todo o texto para minúsculas;
+- remoção de espaços extras e pontuação;
+- remoção de termos societários comuns, como Inc, LLC, Corp, Ltda e Group;
+- remoção de palavras pouco relevantes para a identificação, como stopwords.
 
 A normalização não substitui a comparação com o texto original, mas atua como uma camada complementar de apoio ao matching. Por esse motivo, o projeto preserva tanto o nome original quanto sua versão normalizada, permitindo que a análise considere simultaneamente a forma bruta recebida no input e uma representação mais padronizada.
 
