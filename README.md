@@ -252,14 +252,11 @@ Do ponto de vista analítico, a inclusão da aba de métricas trouxe valor adici
 
 Os resultados do projeto mostram que a automação não apenas reduz o esforço de busca e comparação textual, mas também apoia uma decisão mais sofisticada: recomendar o nível mais adequado dentro de uma estrutura comercial hierárquica, na qual diferentes segmentos e coberturas possuem papéis distintos na definição dos territórios.
 
-Mesmo quando a ferramenta não consegue decidir automaticamente uma única resposta ideal, ela ainda gera valor relevante ao reduzir o universo de busca e apresentar os candidatos mais plausíveis de forma organizada, deixando claro onde há conflito e onde a revisão humana é necessária. Há espaço para melhora com a inclusão de outras técnicas de comparação de string, considerando também a estrutura do modelo da empresa. A presença de registros desatualizados e irrelevantes, como no exemplo abaixo da MGM studios que foi vendida da Disney para Amazon em 2022, embora ambos registros ainda permaneçam no sistema, levou a uma discussão sobre mudança de plataforma.
+Mesmo quando a ferramenta não consegue decidir automaticamente uma única resposta ideal, ela ainda gera valor relevante ao reduzir o universo de busca e apresentar os candidatos mais plausíveis de forma organizada, deixando claro onde há conflito e onde a revisão humana é necessária. Há espaço para melhora com a inclusão de outras técnicas de comparação de string, considerando também a estrutura do modelo da empresa.
+
+A presença de registros desatualizados e irrelevantes, como no exemplo abaixo da MGM studios que foi vendida da Disney para Amazon em 2022, embora ambos registros ainda permaneçam no sistema, levou a uma discussão sobre mudança de plataforma.
 
 <img width="975" height="100" alt="image" src="https://github.com/user-attachments/assets/0345b1f9-053f-4c58-b236-8b44f908351e" />
-
-
-Output da execução no VS code:
-<img width="975" height="470" alt="image" src="https://github.com/user-attachments/assets/20f987d0-7eb3-4b40-a00b-441dee1a406f" />
-
 
 ### 4. Conclusões
 
@@ -297,6 +294,8 @@ A apresentação da solução no meio corporativo resultou em duas decisões:
 
 Arquivos de solicitação e aplicação real armazenados na pasta [Results]([https://github.com/leopcdata](https://github.com/leopcdata/bimaster_final/tree/main/results) 
 
+Output da execução no VS code:
+<img width="975" height="470" alt="image" src="https://github.com/user-attachments/assets/20f987d0-7eb3-4b40-a00b-441dee1a406f" />
 ---
 
 Matrícula: 232100499
