@@ -9,7 +9,7 @@ Trabalho apresentado ao curso [BI MASTER](https://ica.puc-rio.ai/bi-master) como
 
 ### Resumo
 
-Este trabalho apresenta o desenvolvimento de uma ferramenta de apoio à decisão voltada ao mapeamento de clientes para composição de territórios comerciais em uma grande empresa de tecnologia. O projeto surge da necessidade de reduzir a dependência de um processo manual, demorado e sujeito a inconsistências, no qual analistas precisam associar empresas informadas por gestores a registros da base corporativa, considerando não apenas similaridade textual, mas também a hierarquia comercial e o segmento adequado de cada cliente. Para isso, a solução combina normalização de dados, técnicas de fuzzy matching e regras de negócio, com o objetivo de aumentar a eficiência operacional, padronizar decisões e apoiar a integração mais rápida de vendedores e carteiras de clientes provenientes de aquisições.
+Este trabalho apresenta o desenvolvimento de uma ferramenta de apoio à decisão voltada ao mapeamento de clientes para composição de áreas comerciais em uma grande empresa de tecnologia. O projeto surge da necessidade de reduzir a dependência de um processo manual, demorado e sujeito a inconsistências, no qual é necessário associar empresas informadas por gestores a respectivos registros da base de dados corporativa, considerando não apenas similaridade textual, mas também a hierarquia comercial e o segmento adequado de cada cliente. Para isso, a solução combina normalização de dados, técnicas de fuzzy matching e regras de negócio, com o objetivo de aumentar a eficiência operacional, padronizar decisões e apoiar a integração mais rápida de vendedores e carteiras de clientes provenientes de aquisições.
 
 ### Abstract
 
