@@ -13,13 +13,13 @@ Este trabalho apresenta o desenvolvimento de uma ferramenta de apoio à decisão
 
 ### Abstract
 
-This project presents the development of a decision-support tool focused on mapping client portfolios resulting from acquisitions, with the goal of supporting the faster integration of sellers into a large technology company. The project arises from the need to reduce dependence on a manual and time-consuming process in which clients received through acquisition processes must be matched to their corresponding records in the corporate database, while considering the organization’s commercial structure (Go-to-Market). To address this challenge, the solution combines natural language processing techniques and business rules in order to increase operational efficiency, standardize mapping recommendations, and contribute to greater accuracy in the definition of territories, targets, and commissions, that should positively impact the company’s results as consequence.
+This project presents the development of a decision-support tool focused on mapping client portfolios resulting from acquisitions, with the goal of supporting the faster integration of sellers into a large technology company. The project arises from the need to reduce dependence on a manual and time-consuming process in which clients received through acquisition processes must be matched to their corresponding records in the corporate database, while considering the organization’s commercial structure (Go-to-Market). To address this challenge, the solution combines natural language processing techniques and business rules in order to increase operational efficiency, standardize mapping recommendations, and contribute to greater accuracy in the definition of territories, targets, and commissions, with the potential to positevely impact the company’s results as consequence.
 
 ### 1. Introdução
 
-Atuo no departamento de Sales Compensation de uma empresa global de tecnologia, responsável por processos relacionados à definição de planos de vendas, administração de territórios comerciais e cálculo de comissões. Nesse contexto, a correta associação entre clientes e territórios comerciais é um elemento central, uma vez que impacta diretamente a definição de metas, a elegibilidade das vendas e a remuneração variável dos vendedores.
+O autor atua no departamento de Sales Compensation de uma empresa global de tecnologia, responsável por processos relacionados à definição de planos de vendas, administração de territórios comerciais e cálculo de comissões. Nesse contexto, a correta associação entre clientes e territórios comerciais é um elemento central, uma vez que impacta diretamente a definição de metas, a elegibilidade das vendas e a remuneração variável dos vendedores.
 
-Nos últimos anos, a companhia intensificou sua estratégia de crescimento por aquisições, mais de 30 nos últimos 5 anos, e ao mesmo tempo em que reduziu o prazo esperado para integração das empresas adquiridas. Esse movimento ampliou a necessidade de incorporar novos vendedores e suas carteiras de clientes de forma ágil e estruturada aos sistemas corporativos. Entre as etapas mais críticas desse processo está o mapeamento das empresas informadas pelos gestores para a base comercial da organização, utilizada como referência para a configuração de áreas de cobertura individuais.
+A companhia intensificou sua estratégia de crescimento por aquisições, com mais de 30 nos últimos cinco anos, e ao mesmo tempo tenta reduzir o prazo esperado para integração dos funcionários das empresas adquiridas, principalmente o corpo de vendas. Esse movimento ampliou a necessidade de incorporar novos vendedores e suas carteiras de clientes de forma ágil e estruturada aos sistemas corporativos. Entre as etapas mais críticas desse processo está o mapeamento das empresas informadas pelos gestores para a base comercial da organização, utilizada como referência para a configuração de áreas de cobertura individuais.
 
 Atualmente, esse mapeamento é realizado de forma predominantemente manual. Os analistas do setor precisam consultar individualmente cada empresa recebida em planilhas de entrada, confrontando essas informações com uma base corporativa composta por milhões de registros ativos. Além do elevado volume de dados, a atividade é dificultada pela ausência de padronização textual nos nomes das empresas informados, que frequentemente apresentam abreviações, siglas, variações ortográficas, sufixos societários e diferenças de formatação.
 
@@ -29,7 +29,7 @@ Diante desse cenário, este trabalho propõe o desenvolvimento de uma ferramenta
 
 ### 2. Regras de Negócio
 
-Antes de seguir com a modelagem, importante evidenciar a estrutura hierárquia dos clientes da empresa. Em 2026, os clientes estão distribuídos dentro quatro segmentos que refletem diferentes níveis de dedicação comercial, estratégia de vendas e comissão:
+Antes de seguir com a modelagem, importante evidenciar a estrutura hierárquia dos clientes da empresa. Em 2026, os clientes estão distribuídos em quatro segmentos que refletem diferentes níveis de dedicação comercial, estratégia de vendas e comissão:
 
 - **Enterprise**
 - **Strategic**
@@ -40,7 +40,7 @@ Nos segmentos Enterprise, Strategic e Select Horizon, clientes de maior relevân
 
 A cobertura constitui um dos principais elementos utilizados na definição dos territórios de vendas. Em alguns casos, ela representa praticamente um cliente individual; em outros, corresponde a agrupamentos de dezenas ou até milhares de clientes. Por esse motivo, a decisão de mapeamento vai além da similaridade textual entre nomes, exigindo também a identificação do nível mais adequado dentro da hierarquia comercial.
 
-A modelagem deve sempre deve priorizar a estrutura de maior relevância quando uma busca retornar resultados em diferentes segmentos para uma mesma entrada. Do ponto de vista de negócio, esse mapeamento é altamente crítico. Os planos de vendas são definidos no início do ano e, após sua oferta, só podem ser modificados em condições bastante específicas. Esses planos são compostos, de forma geral, pelos clientes sob responsabilidade do vendedor e pelos produtos que ele deve comercializar. A partir dessas definições, o sistema calcula metas com base no histórico dos clientes e na estratégia de crescimento. 
+A modelagem deve sempre priorizar a estrutura de maior relevância quando uma busca retornar resultados em diferentes segmentos para uma mesma entrada. Do ponto de vista de negócio, esse mapeamento é altamente crítico. Os planos de vendas são definidos no início do ano e, após sua oferta, só podem ser modificados em condições bastante específicas. Esses planos são compostos, de forma geral, pelos clientes sob responsabilidade do vendedor e pelos produtos que ele deve comercializar. A partir dessas definições, o sistema calcula metas com base no histórico dos clientes e na estratégia de crescimento. 
 
 ### 3. Modelagem
 A modelagem da solução foi estruturada para reproduzir, de forma padronizada e escalável, a etapa inicial do processo de integração de vendedores oriundos de aquisições. Na prática, esse processo começa quando um gerente de vendas envia uma lista de clientes que devem ser incorporados ao território de sua equipe. Essa lista normalmente contém apenas os nomes das empresas, sem padronização e sem referência direta aos identificadores utilizados na base corporativa. A partir dessa entrada, iniciam-se as etapas críticas do fluxo.
@@ -231,7 +231,7 @@ Entre as limitações e próximos passos, destacam-se:
 - possível incorporação de abordagens mais avançadas de NLP para melhorar o tratamento de ambiguidades
 - evolução da camada de apresentação para facilitar o uso por mais analistas
 
-Exemplo da presença de registros desatualizados e irrelevantes, a MGM studios foi vendida da Disney para Amazon em 2022, embora ambos registros ainda permaneçam no sistema.
+Um exemplo da presença de registros desatualizados e irrelevantes é o cliente MGM studios, que foi vendida da Disney para Amazon em 2022, embora ambos registros ainda permaneçam no sistema.
 
 <img width="975" height="100" alt="image" src="https://github.com/user-attachments/assets/0345b1f9-053f-4c58-b236-8b44f908351e" />
 
@@ -240,7 +240,7 @@ A apresentação da solução no meio corporativo resultou em duas decisões:
 - Adoção imediata como modelo a ser usado pela empresa
 - Estudo inicial para simplificação do processo e potencial migração para SAP
 
-### 6. Referências
+### 5. Referências
 
 -Arquivos de solicitação e aplicação real armazenados na pasta [Results](https://github.com/leopcdata/bimaster_final/tree/main/results)   
 
