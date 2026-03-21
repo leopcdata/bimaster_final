@@ -60,7 +60,14 @@ A proposta desenvolvida neste trabalho consiste em uma ferramenta em Python de a
 
 A modelagem da solução foi construída em etapas, buscando refletir o processo real executado pelos analistas, mas de forma estruturada, mensurável e reproduzível.
 
+O processo se inicia quando um gerente de vendas envia uma lista de clientes que devem ser adicionados ao seu território de vendas e do seu time. Segue um exemplo:
+
+<img width="539" height="303" alt="image" src="https://github.com/user-attachments/assets/c4cf4bff-5df9-435f-a7b4-e5f035105f13" />
+
+
 #### 2.1 Extração de dados
+
+A partir da lista de clientes recebida o processo se inicia com a extração de dados.
 
 •	Uso combinado de Python and SQL para extração de dados
 •	Cache local por país para reduzir a quantidade de consultas em SQL e melhorar a performance.*
@@ -77,6 +84,10 @@ A consulta retorna, entre outros campos:
 - indústria
 - país
 
+Mostrando como exemplo a base de clientes nos EUA apenas, lugar de maior volume de negócios, há registros de 470 mil clientes. Considerando o mundo todo, são milhões de registros.
+- <img width="629" height="334" alt="image" src="https://github.com/user-attachments/assets/032cc20f-c483-49ce-ac72-3153b1de954c" />
+
+
 #### 2.2 Normalização textual
 
 O segundo desafio foi tratar a inconsistência dos nomes das empresas no input e na base interna. Para lidar com isso, foi criada uma rotina de normalização textual por meio de:
@@ -87,8 +98,6 @@ O segundo desafio foi tratar a inconsistência dos nomes das empresas no input e
 A normalização não substitui a comparação bruta, mas complementa a análise. Essa foi uma decisão importante do projeto: preservar tanto o nome original quanto o nome normalizado, em vez de depender apenas de um formato tratado.
 
 #### 2.3 Estratégia de matching
-
-O terceiro desafio foi comparar nomes de forma robusta, evitando tanto falsos negativos quanto falsos positivos.
 
 A solução adotada utiliza duas abordagens complementares:
 
@@ -108,7 +117,7 @@ Para o cálculo de similaridade, foi utilizado fuzzy matching (biblioteca RapidF
 - candidatos de alta confiança: score igual ou maior que 80 durante a geração
 - candidatos de fallback: matches normalizados entre 60 e 80 quando não há match normalizado mais forte
 
-Essa abordagem é especialmente importante para evitar problemas de substring simples. Um exemplo clássico é o caso de “AON”. Se fosse usada apenas uma busca por trecho, resultados como “Kaonmedia” poderiam aparecer como candidatos indevidos. O uso de similaridade textual com critérios adicionais reduz esse risco.
+Essa abordagem é especialmente importante para evitar problemas de substring simples. Um exemplo é o caso de “AON”. Se fosse usada apenas uma busca por trecho, resultados como “Kaonmedia” poderiam aparecer como candidatos indevidos. O uso de similaridade textual com critérios adicionais reduz esse risco.
 
 Outros desafios ainda persistem, como no exemplo de entrada -  'As America, Inc' que retorna pontuações semelhantes encontradas para: 'Asm America' e 'JAS America'. Isso abre espaço para pontos de melhoria e criações de regras adicionais, considerando tanto os parâmetros hierárquicos do negócio como técnicas adicionais de comparação de string.
 
@@ -130,7 +139,6 @@ Uma parte essencial da modelagem foi estruturar o problema em grupos de contas c
 **Grupo 3**
 - Activate
 - Growth
-- BP WW CEID
 
 **Grupo 4**
 - Activate Unassigned
@@ -156,7 +164,7 @@ Nos Grupos 3 e 4, quando múltiplos candidatos de alta confiança existem para a
 
 `Multiple Global Client IDs - check Details tab`
 
-Essa decisão evita poluir o resumo final e direciona a revisão para a aba de detalhes quando necessário.
+Essa decisão direciona a revisão humana para a aba de detalhes quando necessário.
 
 #### 2.6 Estrutura de saída
 
@@ -185,7 +193,7 @@ Além disso, o Summary possui realces visuais para facilitar a revisão:
 - **azul claro**: empresas com múltiplas linhas no summary
 - **laranja claro**: registros de Activate Unassigned
 
-No caso de **Activate Unassigned**, foi incluída uma observação importante no projeto: entradas classificadas nesse grupo demandam etapas adicionais para garantir o fluxo correto de achievement e pagamento.
+No caso de **Activate Unassigned**, demandam uma atenção importante no projeto: entradas classificadas nesse grupo necessitam etapas adicionais de processo para garantir a ativação dessas contas e consequentemente o pagamento de comissão para o vendedor.
 
 #### 2.7 Desafios enfrentados e soluções encontradas
 
@@ -201,7 +209,7 @@ Como os candidatos podiam surgir a partir de mais de uma etapa de matching, houv
 A primeira versão concentrava muitas responsabilidades no arquivo principal. Ao longo da evolução, a solução foi modularizada em arquivos separados para configuração, execução, métricas, preparação de dados, matching, summary e acesso ao banco, tornando o projeto mais limpo, mais legível e mais sustentável.
 
 **4. Performance**  
-Foi implementado benchmark entre execução sequencial e paralela. O resultado mostrou que, no ambiente testado, a execução sequencial apresentou melhor desempenho total do que a paralela. Isso indicou que o workload do projeto é predominantemente CPU-bound, e que o overhead de threads superava os ganhos potenciais de concorrência. A partir disso, a execução sequencial passou a ser o modo padrão, mantendo o benchmark como opção para análise.
+Foi implementado benchmark entre execução sequencial e paralela (ThreadPoolExecutor). O resultado mostrou que, no ambiente testado, a execução sequencial apresentou melhor desempenho total do que a paralela. Isso indicou que o workload do projeto é predominantemente CPU-bound, e que o overhead de threads superava os ganhos potenciais de concorrência. A partir disso, a execução sequencial passou a ser o modo padrão, mantendo o benchmark como opção para análise.
 
 **5. Representação das regras de negócio**  
 Outro desafio foi traduzir corretamente as regras de priorização da estrutura comercial para uma lógica programável. A solução encontrada foi estruturar os grupos com configuração centralizada e regras explícitas no resumo final, permitindo ajustes futuros com menor esforço.
@@ -238,6 +246,12 @@ Do ponto de vista analítico, a inclusão da aba de métricas trouxe valor adici
 Os resultados do projeto mostram que a automação não apenas reduz o esforço de busca e comparação textual, mas também apoia uma decisão mais sofisticada: recomendar o nível mais adequado dentro de uma estrutura comercial hierárquica, na qual diferentes segmentos e coberturas possuem papéis distintos na definição dos territórios.
 
 Mesmo quando a ferramenta não consegue decidir automaticamente uma única resposta ideal, ela ainda gera valor relevante ao reduzir o universo de busca e apresentar os candidatos mais plausíveis de forma organizada, deixando claro onde há conflito e onde a revisão humana é necessária.
+
+Output da execução no VS code:
+<img width="975" height="470" alt="image" src="https://github.com/user-attachments/assets/20f987d0-7eb3-4b40-a00b-441dee1a406f" />
+
+
+
 
 ### 4. Conclusões
 
