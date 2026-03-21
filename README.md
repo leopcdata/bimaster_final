@@ -245,17 +245,18 @@ Do ponto de vista analítico, a inclusão da aba de métricas trouxe valor adici
 
 Os resultados do projeto mostram que a automação não apenas reduz o esforço de busca e comparação textual, mas também apoia uma decisão mais sofisticada: recomendar o nível mais adequado dentro de uma estrutura comercial hierárquica, na qual diferentes segmentos e coberturas possuem papéis distintos na definição dos territórios.
 
-Mesmo quando a ferramenta não consegue decidir automaticamente uma única resposta ideal, ela ainda gera valor relevante ao reduzir o universo de busca e apresentar os candidatos mais plausíveis de forma organizada, deixando claro onde há conflito e onde a revisão humana é necessária.
+Mesmo quando a ferramenta não consegue decidir automaticamente uma única resposta ideal, ela ainda gera valor relevante ao reduzir o universo de busca e apresentar os candidatos mais plausíveis de forma organizada, deixando claro onde há conflito e onde a revisão humana é necessária. Há espaço para melhora com a inclusão de outras técnicas de comparação de string, considerando também a estrutura do modelo da empresa. A presença de registros desatualizados e irrelevantes, como no exemplo abaixo da MGM studios que foi vendida da Disney para Amazon em 2022, embora ambos registros ainda permaneçam no sistema, levou a uma discussão sobre mudança de plataforma.
+
+<img width="975" height="100" alt="image" src="https://github.com/user-attachments/assets/0345b1f9-053f-4c58-b236-8b44f908351e" />
+
 
 Output da execução no VS code:
 <img width="975" height="470" alt="image" src="https://github.com/user-attachments/assets/20f987d0-7eb3-4b40-a00b-441dee1a406f" />
 
 
-
-
 ### 4. Conclusões
 
-Este trabalho demonstrou que conceitos de sistemas inteligentes de apoio à decisão podem ser aplicados com impacto direto em um processo corporativo real, complexo e sensível para o negócio.
+Este trabalho aplica conceitos de sistemas inteligentes de apoio à decisão diretamente em um processo corporativo real, complexo e sensível para o negócio.
 
 A ferramenta proposta endereça um problema crítico no contexto de aquisições: a correta identificação e classificação de clientes para composição de territórios comerciais. Essa etapa, embora operacional em aparência, tem impacto estratégico na definição de metas, no alinhamento dos planos de venda e na integridade do fluxo de comissão.
 
@@ -280,6 +281,10 @@ Entre as limitações e próximos passos, destacam-se:
 - evolução da camada de apresentação para facilitar o uso por mais analistas
 
 Em síntese, o projeto mostra que é possível transformar um processo manual, demorado e sujeito a inconsistências em um fluxo mais inteligente, mensurável, escalável e alinhado às necessidades do negócio.
+
+A apresentação da solução no meio corporativo resultou em duas decisões:
+- Aplicação prática imediata
+- Estudo inicial para simplificação do processo e potencial migração para SAP
 
 ---
 
