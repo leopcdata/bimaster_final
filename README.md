@@ -245,7 +245,8 @@ Um exemplo da presença de registros desatualizados e irrelevantes é o cliente 
 <img width="975" height="100" alt="image" src="https://github.com/user-attachments/assets/0345b1f9-053f-4c58-b236-8b44f908351e" />
 Figura 6. Exemplo de dados desatualizados no sistema
 
-<br>
+
+
 A apresentação da solução no meio corporativo resultou em duas decisões:
 - Adoção imediata como modelo a ser usado pela empresa
 - Estudo inicial para simplificação do processo e potencial migração para SAP
@@ -257,7 +258,7 @@ A apresentação da solução no meio corporativo resultou em duas decisões:
 - Código Python nos arquivos main.py, config.py, benchmark.py da pasta principal desse GitHub, e outras funções auxiliares na pasta [utils](https://github.com/leopcdata/bimaster_final/tree/main/utils)
 
 <img width="975" height="470" alt="image" src="https://github.com/user-attachments/assets/20f987d0-7eb3-4b40-a00b-441dee1a406f" />
-Figura 7. Terminal de execução no VS code:
+Figura 7. Terminal de execução no VS code
 
 ---
 Matrícula: 232100499
