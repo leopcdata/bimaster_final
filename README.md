@@ -11,6 +11,7 @@ Trabalho apresentado ao curso [BI MASTER](https://ica.puc-rio.ai/bi-master) como
 
 Este trabalho apresenta o desenvolvimento de uma ferramenta de apoio à decisão voltada ao mapeamento de clientes para composição de áreas comerciais em uma grande empresa de tecnologia. O projeto surge da necessidade de reduzir a dependência de um processo manual, demorado e sujeito a inconsistências, no qual é necessário associar empresas informadas por gestores a respectivos registros da base de dados corporativa, considerando não apenas similaridade textual, mas também a hierarquia comercial e o segmento adequado de cada cliente. Para isso, a solução combina normalização de dados, técnicas de fuzzy matching e regras de negócio, com o objetivo de aumentar a eficiência operacional, padronizar decisões e apoiar a integração mais rápida de vendedores e carteiras de clientes provenientes de aquisições.
 
+
 ### Abstract
 
 This study presents the development of a decision-support tool designed to support client mapping in the definition of sales territories within a large technology company. The project addresses the need to reduce reliance on a manual, time-consuming, and often inconsistent process in which analysts must match companies provided by managers to records in the corporate database, considering not only textual similarity but also the appropriate commercial hierarchy and client segment. To tackle this challenge, the proposed solution combines data normalization, fuzzy matching techniques, and business rules in order to improve operational efficiency, standardize decision-making, and support the faster integration of sellers and client portfolios resulting from Mergers & Acquisitions.
@@ -235,8 +236,9 @@ Exemplo da presença de registros desatualizados e irrelevantes, a MGM studios f
 
 <img width="975" height="100" alt="image" src="https://github.com/user-attachments/assets/0345b1f9-053f-4c58-b236-8b44f908351e" />
 
+
 A apresentação da solução no meio corporativo resultou em duas decisões:
-- Aplicação prática imediata como modelo a ser usado pela empresa
+- Adoção imediata como modelo a ser usado pela empresa
 - Estudo inicial para simplificação do processo e potencial migração para SAP
 
 ### 6. Referências
