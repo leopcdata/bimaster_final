@@ -21,7 +21,7 @@ O autor atua no departamento de Sales Compensation de uma empresa global de tecn
 
 A companhia intensificou sua estratégia de crescimento por aquisições, com mais de 30 nos últimos cinco anos, e ao mesmo tempo tenta reduzir o prazo esperado para integração dos funcionários das empresas adquiridas, principalmente o corpo de vendas. Esse movimento ampliou a necessidade de incorporar novos vendedores e suas carteiras de clientes de forma ágil e estruturada aos sistemas corporativos. Entre as etapas mais críticas desse processo está o mapeamento das empresas informadas pelos gestores para a base comercial da organização, utilizada como referência para a configuração de áreas de cobertura individuais.
 
-Atualmente, esse mapeamento é realizado de forma predominantemente manual. Os analistas do setor precisam consultar individualmente cada empresa recebida em planilhas de entrada, confrontando essas informações com uma base corporativa composta por milhões de registros ativos. Além do elevado volume de dados, a atividade é dificultada pela ausência de padronização textual nos nomes das empresas informados, que frequentemente apresentam abreviações, siglas, variações ortográficas, sufixos societários e diferenças de formatação.
+Atualmente, esse mapeamento é realizado de forma predominantemente manual. Os analistas do setor precisam consultar individualmente cada empresa recebida em planilhas de entrada, confrontando essas informações com a base corporativa composta por milhões de registros ativos, através de uma página web de intranet. Além do elevado volume de dados, a atividade é dificultada pela ausência de padronização textual nos nomes das empresas informados, que frequentemente apresentam abreviações, siglas, variações ortográficas, sufixos societários e diferenças de formatação.
 
 A complexidade do processo, entretanto, não se limita à comparação textual. A decisão final também depende da correta interpretação da hierarquia comercial e do segmento de negócio mais adequado para cada cliente seguindo o modelo de Go-to-Market da empresa, o que exige conhecimento operacional e análise contextual. Em uma integração realizada ano passado, essa etapa demandou aproximadamente uma semana de trabalho de uma equipe de cerca de dez pessoas, evidenciando a baixa escalabilidade e o alto esforço operacional do modelo atual.
 
@@ -220,6 +220,8 @@ Outro desafio relevante é que a estrutura de cobertura não é universal e pode
 
 O principal resultado do projeto foi transformar um processo altamente manual e distribuído em uma solução automatizada, estruturada e orientada por regras de negócio, aplicando conceitos de sistemas inteligentes de apoio à decisão diretamente em um processo corporativo real, complexo e sensível para o negócio.
 
+A aplicação se mostrou capaz de processar centenas de entradas em segundos, se mostrando grande aumento de eficácia em comparação a análise manual que leva cerca de 4 minutos por registro. Para alguns casos podem ser necessários algum tipo de análise individual ainda, mas o output já fornece as informações necessárias e porcentagem de similiradide pra auxílio a tomada de decisão. 
+
 Como contribuição técnica, o projeto integra:
 - conexão com DB2
 - extração estruturada de dados
@@ -249,7 +251,7 @@ Figura 6. Exemplo de dados desatualizados no sistema
 
 A apresentação da solução no meio corporativo resultou em duas decisões:
 - Adoção imediata como modelo a ser usado pela empresa
-- Estudo inicial para simplificação do processo e potencial migração para SAP
+- Discussão inicial para simplificação do processo e potencial estudo para um migração para plataformas existentes no mercado.
 
 ### 5. Referências
 
