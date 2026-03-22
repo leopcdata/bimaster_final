@@ -250,7 +250,7 @@ Figura 6. Exemplo de dados desatualizados no sistema
 
 
 A apresentação da solução no meio corporativo resultou em duas decisões:
-- Adoção imediata como modelo a ser usado pela empresa
+- Adoção imediata como modelo a ser usado pela empresa. A aplicação foi nomeada Acquisition Client Locator tool (ACL).
 - Discussão inicial para simplificação do processo e potencial estudo para um migração para plataformas existentes no mercado.
 
 ### 5. Referências
