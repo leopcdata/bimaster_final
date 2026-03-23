@@ -216,9 +216,9 @@ Outro desafio relevante é que a estrutura de cobertura não é universal e pode
 
 ### 4. Resultados e Conclusões
 
-O principal resultado do projeto foi transformar um processo altamente manual e distribuído em uma solução automatizada, estruturada e orientada por regras de negócio, aplicando conceitos de sistemas inteligentes de apoio à decisão diretamente em um processo corporativo real, complexo e sensível para o negócio.
+O principal resultado do projeto foi transformar um processo altamente manual em uma solução majoritariamente automatizada, estruturada e orientada por regras de negócio, aplicando conceitos de sistemas inteligentes de apoio à decisão diretamente em um processo corporativo real, complexo e sensível para o negócio.
 
-A aplicação se mostrou capaz de processar centenas de entradas em segundos, se mostrando grande aumento de eficácia em comparação a análise manual que leva cerca de 4 minutos por registro. Para alguns casos podem ser necessários algum tipo de análise individual ainda, mas o output já fornece as informações necessárias e porcentagem de similiradide pra auxílio a tomada de decisão. 
+A aplicação desenvolvida se mostrou capaz de processar centenas de entradas em segundos, mostrando grande aumento de eficácia em comparação a análise manual que leva cerca de 4 minutos por registro. Para alguns casos podem ser necessários algum tipo de análise individual ainda, mas o output já fornece as informações necessárias e porcentagem de similiradide pra auxílio à tomada de decisão. Reduzindo o tempo gasto em um processo completo que envolvia diversas pessoas e durava dias, podendo hoje ser executado por apenas uma pessoa.
 
 Como contribuição técnica, o projeto integra:
 - conexão com DB2
