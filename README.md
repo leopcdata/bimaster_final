@@ -225,7 +225,7 @@ Como contribuição técnica, o projeto integra:
 - extração estruturada de dados
 - normalização textual
 - fuzzy matching
-- regras hierárquicas de priorização
+- classificação através de regras hierárquicas de priorização
 - mensuração de performance e qualidade
 - output estruturado para decisão
 
