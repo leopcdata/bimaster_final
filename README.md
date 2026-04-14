@@ -44,6 +44,174 @@ A modelagem deve sempre priorizar a estrutura de maior relevância quando uma bu
 
 ### 3. Metodologia
 
+A metodologia adotada neste trabalho foi estruturada para reproduzir, de forma padronizada e escalável, a etapa inicial do processo de integração de vendedores oriundos de aquisições. Na prática, esse processo começa quando um gerente de vendas envia uma lista de clientes que devem ser incorporados ao território de sua equipe, contendo apenas os nomes das empresas e o país, sem padronização e sem referência direta aos identificadores utilizados na base corporativa.
+
+Para transformar esse fluxo manual em uma pipeline automatizada, a solução foi desenhada em duas dimensões complementares: um **fluxo de processamento** sequencial em etapas, e uma **arquitetura modular** em Python que implementa cada etapa em módulos independentes.
+
+#### 3.1 Visão geral do fluxo
+
+O fluxo completo da solução é composto por seis etapas sequenciais, descritas em alto nível abaixo e detalhadas nas subseções seguintes:
+
+1. **Recebimento do input** — lista de clientes fornecida pelo gestor (Excel), contendo nomes de empresas e país.
+2. **Extração de dados** — consulta à base corporativa via SQL, com filtragem por país e cache local.
+3. **Normalização textual** — padronização dos nomes das empresas para reduzir diferenças de formatação.
+4. **Matching** — comparação textual bruta e normalizada com cálculo de similaridade via fuzzy matching.
+5. **Agrupamento e priorização** — classificação dos candidatos em quatro grupos de negócio e aplicação de regras hierárquicas para definir a recomendação final.
+6. **Geração de outputs** — construção de um arquivo Excel com as abas Summary, Details e Metrics.
+
+#### 3.2 Arquitetura modular da solução
+
+A solução foi organizada em módulos independentes, cada um com responsabilidade única, o que facilita manutenção, testes e evolução futura. A Tabela 1 resume o papel de cada módulo:
+
+| Módulo | Responsabilidade |
+|---|---|
+| `main.py` | Orquestra o fluxo completo: leitura do input, consulta ao banco, preparação dos jobs por grupo, execução, consolidação e geração do Excel final. |
+| `config.py` | Centraliza parâmetros de execução (pastas de entrada/saída, thresholds de confiança, limite de candidatos) e a definição dos quatro grupos de negócio. |
+| `benchmark.py` | Implementa as estratégias de execução sequencial e paralela (via `ThreadPoolExecutor`) e mede o tempo por grupo. |
+| `utils/db_utils.py` | Encapsula a conexão com o banco DB2, a query SQL parametrizada por país e o mecanismo de cache local em CSV. |
+| `utils/matching.py` | Contém a normalização textual, o motor de matching (`process_group`) e os mapeamentos de saída de cada grupo. |
+| `utils/process_utils.py` | Monta os jobs por grupo (`prepare_group_jobs`), anexa empresas não encontradas e finaliza as abas Summary e Details. |
+| `utils/summary.py` | Constrói o arquivo Excel final com as três abas e aplica os realces visuais de revisão. |
+| `utils/metrics.py` | Calcula e formata as métricas de execução e qualidade exibidas na aba Metrics. |
+| `utils/io_utils.py` | Trata a seleção do arquivo de input, a captura do código de país e a montagem do caminho de saída. |
+
+Essa separação foi uma evolução relevante em relação à primeira versão do projeto, que concentrava grande parte da lógica em um único arquivo. A modularização permitiu isolar preocupações distintas (acesso a dados, regras de negócio, apresentação, orquestração) e tornou mais simples a adição de novas funcionalidades, como o benchmark e a aba de métricas.
+
+O ponto de entrada da aplicação é a função `main()` em `main.py`, que executa o fluxo na seguinte ordem:
+
+```
+select_input_file → get_country_code → pd.read_excel
+  → fetch_data (DB2 + cache)
+    → prepare_group_jobs
+      → choose_execution (sequencial | paralelo | benchmark)
+        → append_unmatched_companies
+          → finalize_details
+            → build_metrics_df
+              → write_summary_excel
+```
+
+#### 3.3 Etapa 1 — Extração de dados
+
+A primeira etapa da solução consiste em obter, da base corporativa, o subconjunto de clientes que será utilizado como universo de busca. Essa etapa é implementada no módulo `utils/db_utils.py` e é acionada por `main.py` logo após a leitura do arquivo de input.
+
+A extração é estruturada com três características principais:
+
+- **Uso combinado de Python e SQL** para consultar a base corporativa hospedada em DB2.
+- **Parametrização por país**, limitando o conjunto de registros ao mercado relevante para a aquisição. Essa restrição é essencial, pois a base corporativa possui milhões de registros em escala global, e em mercados grandes como os Estados Unidos o volume ultrapassa 470 mil clientes.
+- **Cache local em CSV**, armazenado em `CACHE_FOLDER`. Na primeira execução para um país, o resultado da consulta é persistido localmente; em execuções subsequentes, os dados são lidos diretamente do arquivo de cache, evitando reconsultas desnecessárias ao banco. Essa abordagem é adequada ao contexto do projeto, já que a estrutura de clientes é definida no início do ano e tende a permanecer estável ao longo do ciclo.
+
+A consulta retorna, para cada cliente, os seguintes campos principais: identificador e nome da cobertura (`COV_TYPE_ID`), grupos globais e domésticos de buying group (`GBL_BUY_GRP`, `DOM_BUY_GRP`), identificador e nome do global client, nome legal do cliente, listas de segmentação válidas (`acct_list_ids`), indústria e país.
+
+![image](https://private-user-images.githubusercontent.com/171187922/567291676-c4cf4bff-5df9-435f-a7b4-e5f035105f13.png)
+
+Figura 1. Exemplo de entrada do processo - Lista fornecida por um gestor
+
+![image](https://private-user-images.githubusercontent.com/171187922/567290197-032cc20f-c483-49ce-ac72-3153b1de954c.png)
+
+Figura 2. Total de clientes registrados nos EUA por segmento
+
+#### 3.4 Etapa 2 — Normalização textual
+
+O segundo desafio da solução é lidar com a inconsistência entre os nomes de empresas informados no input e os registrados na base corporativa. Para isso, `utils/matching.py` implementa uma rotina de normalização que reduz diferenças de formatação sem alterar a identidade da empresa. A normalização aplica as seguintes transformações:
+
+- conversão para minúsculas;
+- remoção de espaços extras e pontuação;
+- remoção de sufixos societários comuns (Inc, LLC, Corp, Ltda, Group, entre outros);
+- remoção de stopwords (palavras pouco relevantes para identificação).
+
+Uma decisão importante do projeto foi **preservar simultaneamente o nome original e sua versão normalizada**. A normalização não substitui a comparação bruta; ela atua como uma camada complementar, permitindo que o matching use as duas representações em sequência.
+
+#### 3.5 Etapa 3 — Estratégia de matching
+
+A comparação entre os nomes do input e os registros da base foi estruturada em duas abordagens complementares e sequenciais, com o objetivo de equilibrar precisão textual e flexibilidade diante de variações de escrita:
+
+- **Raw matching** — compara o nome original da empresa informado no input com o nome legal original do cliente na base.
+- **Normalized matching** — compara as versões normalizadas dos dois nomes, capturando casos em que a comparação bruta não teria sucesso devido a sufixos societários, abreviações ou pequenas variações de formatação.
+
+Para o cálculo de similaridade é utilizada a biblioteca **RapidFuzz**, especializada em comparação aproximada de strings, que retorna um **score de similaridade entre 0 e 100**. A técnica de fuzzy matching mede o grau de proximidade mesmo na presença de erros de digitação, variações ortográficas ou diferenças de estrutura.
+
+O comportamento do matching é controlado por três parâmetros definidos em `config.py`:
+
+- `MATCH_LIMIT = 20` — número máximo de candidatos retornados por empresa na etapa de busca.
+- `HIGH_CONFIDENCE_THRESHOLD = 90` — score mínimo para que um candidato seja considerado de alta confiança.
+- `MID_CONFIDENCE_THRESHOLD = 50` — score mínimo para que um candidato seja considerado como fallback, utilizado quando nenhum candidato de alta confiança é encontrado.
+
+Candidatos com score abaixo de `MID_CONFIDENCE_THRESHOLD` são descartados.
+
+O uso de similaridade textual corrige uma distorção típica de abordagens por substring em SQL. Tomando como exemplo a empresa "AON", uma busca por ocorrência parcial de texto retornaria indevidamente registros como "Kaonmedia". Com fuzzy matching combinado aos critérios adicionais de classificação, esse tipo de falso positivo é significativamente reduzido.
+
+Ainda assim, alguns casos permanecem ambíguos. Um exemplo é a entrada "As America, Inc", que pode retornar scores semelhantes para nomes como "Asm America" e "JAS America". Situações como essa indicam espaço para evolução, seja pela criação de regras adicionais baseadas na hierarquia de negócio, seja pela incorporação de técnicas complementares como embeddings semânticos.
+
+#### 3.6 Etapa 4 — Agrupamento por regras de negócio
+
+Uma contribuição central da modelagem foi estruturar o problema em **grupos de contas com regras de saída e prioridades distintas**, em vez de tratar toda a base da mesma forma. Os registros são organizados em quatro grupos, configurados em `GROUP_CONFIG` dentro de `config.py`:
+
+| Grupo | Listas de conta (`acct_list_names`) | Nível de saída principal |
+|---|---|---|
+| **Grupo 1** | Enterprise Client Expansion, Enterprise Non-Client Expansion, Strategic Client Expansion, Strategic Non-Client Expansion | `COV_TYPE_ID` |
+| **Grupo 2** | Horizon EMEA, Horizon - non-EMEA | `COV_TYPE_ID` |
+| **Grupo 3** | Activate, Growth, BP WW CEID | `GBL_BUY_GRP` (com `DOM_BUY_GRP` em casos específicos) |
+| **Grupo 4** | Activate Unassigned | `GBL_BUY_GRP` (com `DOM_BUY_GRP` em casos específicos) |
+
+Os Grupos 1 e 2 retornam resultados em nível de `COV_TYPE_ID`, pois nesse contexto o nível de cobertura é o mais apropriado para recomendação. Os Grupos 3 e 4 retornam principalmente em nível de `GBL_BUY_GRP`, com tratamento especial para casos em que a melhor forma de exibição é `DOM_BUY_GRP`.
+
+> **Nota:** esses níveis de agrupamento **não se confundem com os segmentos comerciais** apresentados na Seção 2 (Enterprise, Strategic, Select Horizon, Select Territory). Os grupos são agrupamentos operacionais internos da ferramenta, utilizados para aplicar regras de saída e priorização distintas. Os segmentos são uma classificação de negócio da própria empresa.
+
+Para ilustrar a relação entre os níveis de saída, tomemos como exemplo a PepsiCo: a organização PepsiCo como um todo corresponde à estrutura principal (`COV_TYPE_ID`); a divisão entre bebidas e alimentos é representada por diferentes `GBL_BUY_GRP`; e suas marcas individuais correspondem a diferentes `DOM_BUY_GRP`. Essa hierarquia permite diferentes coberturas comerciais para um mesmo conglomerado.
+
+#### 3.7 Etapa 5 — Priorização e consolidação
+
+Após a geração dos candidatos para todos os grupos, a ferramenta precisa consolidar uma recomendação final por empresa na aba Summary. Essa lógica é implementada em `utils/process_utils.py` (funções `append_unmatched_companies` e `finalize_details`), usando os mapeamentos definidos em `utils/matching.py`.
+
+A ordem de priorização aplicada é:
+
+1. Grupo 1 ou Grupo 2 com score ≥ `HIGH_CONFIDENCE_THRESHOLD` (90)
+2. Grupo 3 com score ≥ `HIGH_CONFIDENCE_THRESHOLD` (90)
+3. Grupo 4 com score ≥ `HIGH_CONFIDENCE_THRESHOLD` (90)
+4. Melhor candidato com score entre `MID_CONFIDENCE_THRESHOLD` e `HIGH_CONFIDENCE_THRESHOLD` (50 a 90)
+5. Cliente não encontrado
+
+Nos Grupos 3 e 4, quando múltiplos candidatos de alta confiança existem para a mesma conta, a ferramenta prioriza registros em nível de `GBL_BUY_GRP` quando disponíveis. Quando ainda assim permanecem múltiplos registros relevantes, eles são consolidados em uma única linha no Summary, com uma mensagem que direciona a revisão humana para a aba Details.
+
+Como os candidatos podem surgir a partir de mais de uma etapa de matching (raw e normalizado), foi necessário implementar uma **estratégia de deduplicação** baseada em atributos-chave do resultado, reduzindo repetições e melhorando a qualidade da saída final.
+
+#### 3.8 Etapa 6 — Geração de outputs
+
+A última etapa é construída em `utils/summary.py` e `utils/metrics.py`, invocadas por `main.py` ao final da execução. O resultado é um único arquivo Excel com três abas:
+
+**Summary** — Recomendação final por empresa, respeitando as regras de priorização. Inclui realces visuais para facilitar a revisão humana:
+
+- **amarelo**: cliente não encontrado;
+- **azul claro**: empresas com múltiplas linhas no summary (exigem revisão na aba Details);
+- **laranja claro**: registros de Activate Unassigned, que demandam atenção especial por não serem registros ativos no pipeline do ano corrente e exigirem etapas adicionais de processo para ativação.
+
+**Details** — Todos os candidatos encontrados pelo motor de matching, com score, nível da conta, atributos de cobertura, buying group, global client, grupo de origem e lista de segmentação.
+
+**Metrics** — Métricas de execução e qualidade, incluindo número de empresas processadas, empresas encontradas e não encontradas, percentuais de cobertura, distribuição de matches por grupo, quantidade de matches de alta confiança, empresas com múltiplos resultados, tempo total de execução, tempo por grupo e tempo médio por empresa processada.
+
+![image](https://private-user-images.githubusercontent.com/171187922/567294200-49fc9f46-24fb-42c8-aaca-ae46ae8dbe38.png)
+![image](https://private-user-images.githubusercontent.com/171187922/567294262-8ffb9f3f-b657-4ef2-9ac5-a3554a40b7f9.png)
+
+Figuras 3 e 4. Resultados de métricas
+
+![image](https://private-user-images.githubusercontent.com/171187922/567293947-af6640f2-4002-476e-9065-bd7802060717.png)
+
+Figura 5. Exemplo de um resultado prático da aplicação
+
+#### 3.9 Estratégia de execução e benchmark
+
+Para avaliar o desempenho da solução, `benchmark.py` implementa duas estratégias de execução que podem ser selecionadas via `config.py`:
+
+- **Sequencial** (`run_groups_sequential`) — processa os quatro grupos um a um.
+- **Paralela** (`run_groups_parallel`) — processa os grupos simultaneamente usando um `ThreadPoolExecutor` com um worker por grupo.
+
+O modo padrão é controlado por `DEFAULT_EXECUTION_MODE = "sequential"`. Adicionalmente, ativando `RUN_BENCHMARK = True`, a função `choose_execution()` em `main.py` executa **ambas as estratégias** na mesma rodada, compara os tempos totais e seleciona automaticamente a mais rápida para gerar os outputs, registrando também os tempos comparativos na aba Metrics.
+
+O benchmark mostrou que, no ambiente testado, a execução sequencial apresentou desempenho total superior à paralela. Esse resultado indica que o workload é predominantemente **CPU-bound** — o overhead de criação e sincronização de threads supera os ganhos potenciais de concorrência, limitados pelo GIL do Python para tarefas desse tipo. Com base nessa evidência, a execução sequencial passou a ser o modo padrão, mantendo o benchmark como opção para análises futuras (por exemplo, caso se migre a paralelização para `ProcessPoolExecutor` ou para uma execução distribuída).
+
+
+### 3. Metodologia
+
 A metodologia adotada neste trabalho foi estruturada em etapas sequenciais, com o objetivo de reproduzir e automatizar o processo manual de mapeamento de clientes. O fluxo completo da solução pode ser descrito da seguinte forma:
 
 1. **Recebimento do input**
