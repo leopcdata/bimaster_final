@@ -192,9 +192,45 @@ As empresas classificadas como **Activate Unassigned**, demandam uma atenção i
 <img width="886" height="250" alt="image" src="https://github.com/user-attachments/assets/af6640f2-4002-476e-9065-bd7802060717" />
 Figura 5. Exemplo de um resultado prático da aplicação
 
+### 4. Metodologia
 
+A metodologia adotada neste trabalho foi estruturada em etapas sequenciais, com o objetivo de reproduzir e automatizar o processo manual de mapeamento de clientes. O fluxo completo da solução pode ser descrito da seguinte forma:
 
-#### 3.7 Desafios enfrentados e soluções encontradas
+1. **Recebimento do input**
+   - Lista de clientes fornecida por gestores, contendo apenas nomes de empresas e país.
+
+2. **Extração de dados**
+   - Consulta à base corporativa via SQL.
+   - Filtragem por país para reduzir volume.
+   - Armazenamento em cache local para reutilização.
+
+3. **Normalização textual**
+   - Conversão para minúsculas.
+   - Remoção de pontuação e espaços extras.
+   - Remoção de sufixos societários (Inc, Ltda, Corp, etc).
+   - Remoção de palavras irrelevantes (stopwords).
+
+4. **Matching de nomes**
+   - Comparação direta (raw matching).
+   - Comparação normalizada (normalized matching).
+   - Cálculo de similaridade utilizando fuzzy matching (RapidFuzz).
+
+5. **Classificação de candidatos**
+   - Separação por grupos de negócio (Grupos 1 a 4).
+   - Identificação de nível (COV_TYPE_ID, GBL_BUY_GRP, etc).
+
+6. **Priorização**
+   - Aplicação de regras hierárquicas para definição do melhor candidato.
+   - Consolidação dos resultados.
+
+7. **Geração de outputs**
+   - Aba Summary com recomendação final.
+   - Aba Details com todos os candidatos.
+   - Aba Metrics com indicadores de execução.
+
+Esse fluxo permite transformar um processo manual em uma pipeline estruturada e reprodutível.
+
+#### 4.1 Desafios enfrentados e soluções encontradas
 
 Ao longo da execução do projeto, alguns desafios importantes surgiram.
 
@@ -216,7 +252,7 @@ Outro desafio foi traduzir corretamente as regras de priorização da estrutura 
 **6. Variação entre mercados e países**  
 Outro desafio relevante é que a estrutura de cobertura não é universal e pode variar entre países e mercados. Cada unidade geográfica pode definir suas próprias regras e estratégias locais para agrupar clientes, desde que alinhadas ao modelo comercial global. Além disso, a estrutura de cobertura é revisada a cada planejamento anual e depois permanece congelada durante o ciclo de execução. Isso reforça a necessidade de tomar a decisão correta no momento do mapping, já que a configuração inicial do território terá impacto durante todo o período de vigência do plano de venda.
 
-### 4. Resultados e Conclusões
+### 5. Resultados 
 
 O principal resultado do projeto foi transformar um processo altamente manual em uma solução majoritariamente automatizada, estruturada e orientada por regras de negócio, aplicando conceitos de sistemas inteligentes de apoio à decisão diretamente em um processo corporativo real, complexo e sensível para o negócio.
 
@@ -233,27 +269,28 @@ Como contribuição técnica, o projeto integra:
 
 Os resultados do projeto mostram que a automação não apenas reduz o esforço de busca e comparação textual, mas também apoia uma decisão mais sofisticada: recomendar o nível mais adequado dentro de uma estrutura comercial hierárquica, na qual diferentes segmentos e coberturas possuem papéis distintos na definição dos territórios.
 
-Mesmo quando a ferramenta não consegue decidir automaticamente uma única resposta ideal, ela ainda gera valor relevante ao reduzir o universo de busca e apresentar os candidatos mais plausíveis de forma organizada, deixando claro onde há conflito e onde a revisão humana é necessária. Há espaço para melhoria com a inclusão de outras técnicas de comparação de string, considerando também a estrutura do modelo da empresa.
+A ferramenta também fornece suporte à decisão mesmo em casos ambíguos, ao apresentar múltiplos candidatos com score de similaridade e atributos relevantes. Mesmo quando a ferramenta não consegue decidir automaticamente uma única resposta ideal, ela ainda gera valor relevante ao reduzir o universo de busca e apresentar os candidatos mais plausíveis de forma organizada, deixando claro onde há conflito e onde a revisão humana é necessária. Há espaço para melhoria com a inclusão de outras técnicas de comparação de string, considerando também a estrutura do modelo da empresa.
 
-Entre as limitações e próximos passos, destacam-se:
+Um exemplo da presença de registros desatualizados e irrelevantes que dificultam o processo atual é o cliente MGM studios presente abaixo, que foi vendido da Disney para Amazon em 2022, embora ambos registros ainda permaneçam no sistema.
+
+<img width="975" height="100" alt="image" src="https://github.com/user-attachments/assets/0345b1f9-053f-4c58-b236-8b44f908351e" />
+Figura 6. Exemplo de dados desatualizados no sistema
+
+### 6. Conclusões
+
+- A solução foi apresentada no ambiente corporativo e aprovada para uso real;
+- Foi adotada como modelo operacional sob o nome Acquisition Client Locator (ACL);
+
+Discussão inicial para simplificação do processo e potencial estudo para um migração para plataformas existentes no mercado.
+
+ Entre as limitações e próximos passos, destacam-se:
 - refinamento contínuo das regras de priorização
 - ampliação do conjunto de métricas
 - criação de amostras validadas para medir precisão de forma mais formal
 - possível incorporação de abordagens mais avançadas de NLP para melhorar o tratamento de ambiguidades
 - evolução da camada de apresentação para facilitar o uso por mais analistas
 
-Um exemplo da presença de registros desatualizados e irrelevantes é o cliente MGM studios, que foi vendida da Disney para Amazon em 2022, embora ambos registros ainda permaneçam no sistema.
-
-<img width="975" height="100" alt="image" src="https://github.com/user-attachments/assets/0345b1f9-053f-4c58-b236-8b44f908351e" />
-Figura 6. Exemplo de dados desatualizados no sistema
-
-
-
-A apresentação da solução no meio corporativo resultou em duas decisões:
-- Adoção imediata como modelo a ser usado pela empresa. A aplicação foi nomeada Acquisition Client Locator tool (ACL).
-- Discussão inicial para simplificação do processo e potencial estudo para um migração para plataformas existentes no mercado.
-
-### 5. Referências
+### 7. Referências
 
 - Arquivos de solicitação e aplicação real armazenados na pasta [Results](https://github.com/leopcdata/bimaster_final/tree/main/results)   
 
