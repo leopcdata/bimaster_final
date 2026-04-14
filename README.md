@@ -42,7 +42,45 @@ A cobertura constitui um dos principais elementos utilizados na definição dos 
 
 A modelagem deve sempre priorizar a estrutura de maior relevância quando uma busca retornar resultados em diferentes segmentos para uma mesma entrada. Do ponto de vista de negócio, esse mapeamento é altamente crítico. Os planos de vendas são definidos no início do ano e, após sua oferta, só podem ser modificados em condições bastante específicas. Esses planos são compostos, de forma geral, pelos clientes sob responsabilidade do vendedor e pelos produtos que ele deve comercializar. A partir dessas definições, o sistema calcula metas com base no histórico dos clientes e na estratégia de crescimento. 
 
-### 3. Modelagem
+### 3. Metodologia
+
+A metodologia adotada neste trabalho foi estruturada em etapas sequenciais, com o objetivo de reproduzir e automatizar o processo manual de mapeamento de clientes. O fluxo completo da solução pode ser descrito da seguinte forma:
+
+1. **Recebimento do input**
+   - Lista de clientes fornecida por gestores, contendo apenas nomes de empresas e país.
+
+2. **Extração de dados**
+   - Consulta à base corporativa via SQL.
+   - Filtragem por país para reduzir volume.
+   - Armazenamento em cache local para reutilização.
+
+3. **Normalização textual**
+   - Conversão para minúsculas.
+   - Remoção de pontuação e espaços extras.
+   - Remoção de sufixos societários (Inc, Ltda, Corp, etc).
+   - Remoção de palavras irrelevantes (stopwords).
+
+4. **Matching de nomes**
+   - Comparação direta (raw matching).
+   - Comparação normalizada (normalized matching).
+   - Cálculo de similaridade utilizando fuzzy matching (RapidFuzz).
+
+5. **Classificação de candidatos**
+   - Separação por grupos de negócio (Grupos 1 a 4).
+   - Identificação de nível (COV_TYPE_ID, GBL_BUY_GRP, etc).
+
+6. **Priorização**
+   - Aplicação de regras hierárquicas para definição do melhor candidato.
+   - Consolidação dos resultados.
+
+7. **Geração de outputs**
+   - Aba Summary com recomendação final.
+   - Aba Details com todos os candidatos.
+   - Aba Metrics com indicadores de execução.
+
+Esse fluxo permite transformar um processo manual em uma pipeline estruturada e reprodutível.
+
+### 4. Modelagem
 A modelagem da solução foi estruturada para reproduzir, de forma padronizada e escalável, a etapa inicial do processo de integração de vendedores oriundos de aquisições. Na prática, esse processo começa quando um gerente de vendas envia uma lista de clientes que devem ser incorporados ao território de sua equipe. Essa lista normalmente contém apenas os nomes das empresas, sem padronização e sem referência direta aos identificadores utilizados na base corporativa. A partir dessa entrada, iniciam-se as etapas críticas do fluxo.
 
 Diante desse cenário, a solução proposta neste trabalho consiste em uma ferramenta em Python de apoio à decisão, desenvolvida para automatizar a parte mais custosa desse processo: a busca inicial na base, a comparação textual entre nomes, a classificação preliminar dos candidatos e sua priorização para análise final do analista. A ferramenta não elimina a validação final humana, mas reduz significativamente o esforço manual e aumenta a consistência da etapa de triagem.
@@ -52,7 +90,7 @@ Diante desse cenário, a solução proposta neste trabalho consiste em uma ferra
 Figura 1. Exemplo de entrada do processo - Lista fornecida por um gestor
 
 
-#### 3.1 Extração de dados
+#### 4.1 Extração de dados
 
 A partir da lista de clientes recebida, a primeira etapa da solução consiste na extração dos dados de referência que se encontram no Banco de Dados e que serão utilizados ao longo do processo de identificação e recomendação de contas. Essa etapa foi estruturada para reduzir o universo de busca logo no início e garantir melhor desempenho no processamento, utilizando:
 
@@ -79,7 +117,7 @@ A importância dessa etapa também se explica pelo volume de dados analisado. Co
 Figura 2. Total de clientes registrados nos EUA por segmento
 
 
-#### 3.2 Normalização textual
+#### 4.2 Normalização textual
 
 O segundo desafio da solução foi tratar a inconsistência entre os nomes das empresas informados no input e aqueles registrados na base corporativa. Para lidar com isso, foi criada uma rotina de normalização textual com o objetivo de reduzir diferenças de formatação que não alteram a identidade da empresa.
 
@@ -92,7 +130,7 @@ A normalização inclui:
 
 A normalização não substitui a comparação com o texto original, mas atua como uma camada complementar de apoio ao matching. Por esse motivo, o projeto preserva tanto o nome original quanto sua versão normalizada, permitindo que a análise considere simultaneamente a forma bruta recebida no input e uma representação mais padronizada.
 
-#### 3.3 Estratégia de matching
+#### 4.3 Estratégia de matching
 A estratégia de matching foi estruturada em duas abordagens complementares e sequencias, de forma a equilibrar precisão textual e flexibilidade no tratamento de variações de escrita.
 
 - Raw matching: compara o nome original da empresa informado no input com o nome legal original do cliente na base;
@@ -111,7 +149,7 @@ Essa técnica ajuda a evitar distorções típicas de buscas simples por substri
 
 Ainda assim, alguns casos permanecem ambíguos. Um exemplo é a entrada “As America, Inc”, que pode retornar pontuações semelhantes para nomes como “Asm America” e “JAS America”. Situações como essa mostram que ainda há espaço para evolução da solução, seja pela criação de regras adicionais baseadas na hierarquia de negócio, seja pela incorporação de técnicas complementares de comparação textual.
 
-#### 3.4 Agrupamento por regras de negócio
+#### 4.4 Agrupamento por regras de negócio
 
 Uma parte essencial da modelagem foi estruturar o problema em grupos de contas com regras de saída e prioridade diferentes. Em vez de tratar toda a base da mesma forma, os registros foram organizados em quatro grupos:
 
@@ -140,7 +178,7 @@ Essa separação foi uma das principais evoluções do projeto, pois permitiu re
 
 Os termos COV_TYPE_ID, GBL_GRP_ID, DOM_BUY_GRP são a forma que a empresa classifica seus clientes. Dando como exemplo a PEPSI. Podemos classificar a organização PepsiCo como a estrutura principal (COV_TYPE_ID), a divisão entre os setores de bebidas e alimentos como diferentes GBL_BUY_GRP_ID e suas marcas individuais como diferentes DOM_BUY_GRP. Isso permite diferentes coberturas comerciais e classificações para um mesmo conglomerado. 
 
-#### 3.5 Regras de priorização
+#### 4.5 Regras de priorização
 
 Após gerar todos os candidatos, a ferramenta precisa recomendar um resultado final por empresa no Summary. Para isso, foi criada uma lógica de priorização baseada nos grupos e na confiança dos scores.
 
@@ -153,7 +191,7 @@ A ordem atual de priorização é:
 
 Nos Grupos 3 e 4, quando múltiplos candidatos de alta confiança existem para a mesma conta, a ferramenta prioriza registros em nível de **GBL_BUY_GRP** quando disponíveis. Caso existam múltiplos registros para a mesma conta, os registros são consolidados em uma única linha no Summary com uma mensagem direciona a revisão humana para a aba de detalhes.
 
-#### 3.6 Estrutura de saída
+#### 4.6 Estrutura de saída
 
 A ferramenta produz três abas principais:
 
@@ -192,45 +230,7 @@ As empresas classificadas como **Activate Unassigned**, demandam uma atenção i
 <img width="886" height="250" alt="image" src="https://github.com/user-attachments/assets/af6640f2-4002-476e-9065-bd7802060717" />
 Figura 5. Exemplo de um resultado prático da aplicação
 
-### 4. Metodologia
-
-A metodologia adotada neste trabalho foi estruturada em etapas sequenciais, com o objetivo de reproduzir e automatizar o processo manual de mapeamento de clientes. O fluxo completo da solução pode ser descrito da seguinte forma:
-
-1. **Recebimento do input**
-   - Lista de clientes fornecida por gestores, contendo apenas nomes de empresas e país.
-
-2. **Extração de dados**
-   - Consulta à base corporativa via SQL.
-   - Filtragem por país para reduzir volume.
-   - Armazenamento em cache local para reutilização.
-
-3. **Normalização textual**
-   - Conversão para minúsculas.
-   - Remoção de pontuação e espaços extras.
-   - Remoção de sufixos societários (Inc, Ltda, Corp, etc).
-   - Remoção de palavras irrelevantes (stopwords).
-
-4. **Matching de nomes**
-   - Comparação direta (raw matching).
-   - Comparação normalizada (normalized matching).
-   - Cálculo de similaridade utilizando fuzzy matching (RapidFuzz).
-
-5. **Classificação de candidatos**
-   - Separação por grupos de negócio (Grupos 1 a 4).
-   - Identificação de nível (COV_TYPE_ID, GBL_BUY_GRP, etc).
-
-6. **Priorização**
-   - Aplicação de regras hierárquicas para definição do melhor candidato.
-   - Consolidação dos resultados.
-
-7. **Geração de outputs**
-   - Aba Summary com recomendação final.
-   - Aba Details com todos os candidatos.
-   - Aba Metrics com indicadores de execução.
-
-Esse fluxo permite transformar um processo manual em uma pipeline estruturada e reprodutível.
-
-#### 4.1 Desafios enfrentados e soluções encontradas
+#### 4.7 Desafios enfrentados e soluções encontradas
 
 Ao longo da execução do projeto, alguns desafios importantes surgiram.
 
@@ -278,17 +278,24 @@ Figura 6. Exemplo de dados desatualizados no sistema
 
 ### 6. Conclusões
 
-- A solução foi apresentada no ambiente corporativo e aprovada para uso real;
-- Foi adotada como modelo operacional sob o nome Acquisition Client Locator (ACL);
+Este trabalho teve como objetivo reduzir a dependência de um processo manual, demorado e pouco escalável no mapeamento de clientes oriundos de aquisições, etapa crítica para a integração de vendedores em uma grande empresa de tecnologia. 
 
-Discussão inicial para simplificação do processo e potencial estudo para um migração para plataformas existentes no mercado.
+A solução proposta demonstrou que é possível estruturar esse processo por meio da combinação de técnicas de processamento de linguagem natural e regras de negócio, transformando uma atividade predominantemente manual em uma pipeline automatizada, reprodutível e orientada à decisão.
 
- Entre as limitações e próximos passos, destacam-se:
-- refinamento contínuo das regras de priorização
-- ampliação do conjunto de métricas
-- criação de amostras validadas para medir precisão de forma mais formal
-- possível incorporação de abordagens mais avançadas de NLP para melhorar o tratamento de ambiguidades
-- evolução da camada de apresentação para facilitar o uso por mais analistas
+Do ponto de vista prático, o projeto gerou ganhos relevantes de eficiência operacional, reduzindo significativamente o tempo necessário para análise e permitindo que um processo que antes demandava vários dias de trabalho de uma equipe seja executado em poucos minutos por um único analista. Além disso, a padronização das recomendações contribui para maior consistência nas decisões e melhor governança do processo.
+
+Um dos principais diferenciais da solução está na capacidade de não apenas identificar correspondências textuais, mas também recomendar o nível mais adequado dentro de uma estrutura comercial hierárquica, respeitando as regras de segmentação e priorização da organização. Isso aproxima a ferramenta de um sistema de apoio à decisão, e não apenas de um mecanismo de busca.
+
+Como evidência de sua aplicabilidade, a solução foi apresentada no ambiente corporativo e aprovada para uso real, sendo adotada como modelo operacional sob o nome Acquisition Client Locator (ACL). Esse resultado reforça a relevância prática do projeto e sua aderência às necessidades do negócio.
+
+Apesar dos resultados positivos, o trabalho apresenta algumas limitações. Como trabalhos futuros, destacam-se oportunidades relevantes de evolução, incluindo:
+- o refinamento contínuo das regras de priorização;
+- a incorporação de técnicas mais avançadas de NLP, como embeddings semânticos, para melhorar o tratamento de ambiguidades;
+- a evolução da camada de apresentação, tornando a solução mais acessível a usuários não técnicos;
+
+Essas melhorias podem ampliar ainda mais o impacto da solução, aumentando sua precisão, escalabilidade e adoção dentro do ambiente corporativo. 
+
+Como consequência do projeto há uma discussão inicial para simplificação do processo e estudo para migração para plataformas existentes no mercado, como SAP e SalesForce.
 
 ### 7. Referências
 
