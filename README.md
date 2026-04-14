@@ -13,7 +13,7 @@ Este trabalho apresenta o desenvolvimento de uma ferramenta de apoio à decisão
 
 ### Abstract
 
-This project presents the development of a decision-support tool focused on mapping client portfolios resulting from acquisitions, with the goal of supporting the faster integration of sellers into a large technology company. The project arises from the need to reduce dependence on a manual and time-consuming process in which clients received through acquisition processes must be matched to their corresponding records in the corporate database, while considering the organization’s commercial structure (Go-to-Market). To address this challenge, the solution combines natural language processing techniques and business rules in order to increase operational efficiency, standardize mapping recommendations, and contribute to greater accuracy in the definition of territories, targets, and commissions, with the potential to positevely impact the company’s results as consequence.
+This project presents the development of a decision-support tool focused on mapping client portfolios resulting from acquisitions, with the goal of supporting the faster integration of sellers into a large technology company. The project arises from the need to reduce dependence on a manual and time-consuming process in which clients received through acquisition processes must be matched to their corresponding records in the corporate database, while considering the organization’s commercial structure (Go-to-Market). To address this challenge, the solution combines natural language processing techniques and business rules in order to increase operational efficiency, standardize mapping recommendations, and contribute to greater accuracy in the definition of territories, targets, and commissions, with the potential to positively impact the company’s results as a consequence.
 
 ### 1. Introdução
 
@@ -29,7 +29,7 @@ Diante desse cenário, este trabalho propõe o desenvolvimento de uma ferramenta
 
 ### 2. Regras de Negócio
 
-Antes de seguir com a modelagem, importante evidenciar a estrutura hierárquia dos clientes da empresa. Em 2026, os clientes estão distribuídos em quatro segmentos que refletem diferentes níveis de dedicação comercial, estratégia de vendas e comissão:
+Antes de seguir com a modelagem, importante evidenciar a estrutura hierárquica dos clientes da empresa. Em 2026, os clientes estão distribuídos em quatro segmentos que refletem diferentes níveis de dedicação comercial, estratégia de vendas e comissão:
 
 - **Enterprise**
 - **Strategic**
@@ -98,7 +98,7 @@ A partir da lista de clientes recebida, a primeira etapa da solução consiste n
 - parametrização da busca em nível de país, limitando o conjunto de registros analisados;
 - utilização de cache local por país, com o objetivo de reduzir consultas repetidas ao banco e melhorar a performance.
 
-Quando os dados de um país é processado pela primeira vez, o código estabelece conexão com o banco de dados, executa a consulta SQL correspondente e armazena o resultado localmente. Quando esse mesmo país já foi executado anteriormente, a leitura passa a ser feita diretamente a partir do arquivo de cache gerado em csv, evitando reconsultas desnecessárias ao banco e reduzindo o tempo total de processamento. Essa abordagem é adequada ao contexto do projeto, pois esses dados são definidos para o ano corrente e tendem a permanecer estáveis, exceto em situações pontuais.
+Quando os dados de um país são processados pela primeira vez, o código estabelece conexão com o banco de dados, executa a consulta SQL correspondente e armazena o resultado localmente. Quando esse mesmo país já foi executado anteriormente, a leitura passa a ser feita diretamente a partir do arquivo de cache gerado em csv, evitando reconsultas desnecessárias ao banco e reduzindo o tempo total de processamento. Essa abordagem é adequada ao contexto do projeto, pois esses dados são definidos para o ano corrente e tendem a permanecer estáveis, exceto em situações pontuais.
 
 A consulta retorna, entre outros, os seguintes campos:
 
@@ -131,7 +131,7 @@ A normalização inclui:
 A normalização não substitui a comparação com o texto original, mas atua como uma camada complementar de apoio ao matching. Por esse motivo, o projeto preserva tanto o nome original quanto sua versão normalizada, permitindo que a análise considere simultaneamente a forma bruta recebida no input e uma representação mais padronizada.
 
 #### 4.3 Estratégia de matching
-A estratégia de matching foi estruturada em duas abordagens complementares e sequencias, de forma a equilibrar precisão textual e flexibilidade no tratamento de variações de escrita.
+A estratégia de matching foi estruturada em duas abordagens complementares e sequenciais, de forma a equilibrar precisão textual e flexibilidade no tratamento de variações de escrita.
 
 - Raw matching: compara o nome original da empresa informado no input com o nome legal original do cliente na base;
 - Normalized matching: compara as versões normalizadas dos dois nomes, quando necessário.
@@ -189,7 +189,7 @@ A ordem atual de priorização é:
 4. melhor candidato entre 50 e 90
 5. cliente não encontrado
 
-Nos Grupos 3 e 4, quando múltiplos candidatos de alta confiança existem para a mesma conta, a ferramenta prioriza registros em nível de **GBL_BUY_GRP** quando disponíveis. Caso existam múltiplos registros para a mesma conta, os registros são consolidados em uma única linha no Summary com uma mensagem direciona a revisão humana para a aba de detalhes.
+Nos Grupos 3 e 4, quando múltiplos candidatos de alta confiança existem para a mesma conta, a ferramenta prioriza registros em nível de **GBL_BUY_GRP** quando disponíveis. Caso existam múltiplos registros para a mesma conta, os registros são consolidados em uma única linha no Summary com uma mensagem que direciona a revisão humana para a aba de detalhes.
 
 #### 4.6 Estrutura de saída
 
@@ -256,7 +256,7 @@ Outro desafio relevante é que a estrutura de cobertura não é universal e pode
 
 O principal resultado do projeto foi transformar um processo altamente manual em uma solução majoritariamente automatizada, estruturada e orientada por regras de negócio, aplicando conceitos de sistemas inteligentes de apoio à decisão diretamente em um processo corporativo real, complexo e sensível para o negócio.
 
-A aplicação desenvolvida se mostrou capaz de processar centenas de entradas em segundos, mostrando grande aumento de eficácia em comparação a análise manual que leva cerca de 4 minutos por registro. Para alguns casos podem ser necessários algum tipo de análise individual ainda, mas o output já fornece as informações necessárias e porcentagem de similiradide pra auxílio à tomada de decisão. Reduzindo o tempo gasto em um processo completo que envolvia diversas pessoas e durava dias, podendo hoje ser executado por apenas uma pessoa.
+A aplicação desenvolvida se mostrou capaz de processar centenas de entradas em segundos, mostrando grande aumento de eficiência em comparação a análise manual que leva cerca de 4 minutos por registro. Para alguns casos podem ser necessários algum tipo de análise individual ainda, mas o output já fornece as informações necessárias e porcentagem de similaridide para auxílio à tomada de decisão. Reduzindo o tempo gasto em um processo completo que envolvia diversas pessoas e durava dias, podendo hoje ser executado por apenas uma pessoa.
 
 Como contribuição técnica, o projeto integra:
 - conexão com DB2
