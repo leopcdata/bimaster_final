@@ -69,9 +69,10 @@ A solução foi organizada em módulos independentes, cada um com responsabilida
 | `config.py` | Centraliza parâmetros de execução (pastas de entrada/saída, thresholds de confiança, limite de candidatos) e a definição dos quatro grupos de negócio. |
 | `benchmark.py` | Implementa as estratégias de execução sequencial e paralela (via `ThreadPoolExecutor`) e mede o tempo por grupo. |
 | `utils/db_utils.py` | Encapsula a conexão com o banco DB2, a query SQL parametrizada por país e o mecanismo de cache local em CSV. |
-| `utils/matching.py` | Contém a normalização textual, o motor de matching (`process_group`) e os mapeamentos de saída de cada grupo. |
+| `utils/matching.py` | Contém o motor de matching (`process_group`) e os mapeamentos de saída de cada grupo. |
+| `utils/normalize.py` | Implementa a rotina de normalização textual dos nomes de empresas. |
 | `utils/process_utils.py` | Monta os jobs por grupo (`prepare_group_jobs`), anexa empresas não encontradas e finaliza as abas Summary e Details. |
-| `utils/summary.py` | Constrói o arquivo Excel final com as três abas e aplica os realces visuais de revisão. |
+| `utils/summary.py` | Aplica as regras de priorização, constrói o arquivo Excel final com as três abas e aplica os realces visuais de revisão. |
 | `utils/metrics.py` | Calcula e formata as métricas de execução e qualidade exibidas na aba Metrics. |
 | `utils/io_utils.py` | Trata a seleção do arquivo de input, a captura do código de país e a montagem do caminho de saída. |
 
@@ -94,13 +95,15 @@ select_input_file → get_country_code → pd.read_excel
 
 A primeira etapa da solução consiste em obter, da base corporativa, o subconjunto de clientes que será utilizado como universo de busca. Essa etapa é implementada no módulo `utils/db_utils.py` e é acionada por `main.py` logo após a leitura do arquivo de input.
 
+Ao iniciar a execução, a ferramenta solicita ao usuário, de forma interativa, a seleção do arquivo de input entre os disponíveis na pasta configurada e o código de país (3 dígitos) a ser processado. Essa abordagem simplifica o uso por analistas sem exigir edição de parâmetros no código.
+
 A extração é estruturada com três características principais:
 
 - **Uso combinado de Python e SQL** para consultar a base corporativa hospedada em DB2.
 - **Parametrização por país**, limitando o conjunto de registros ao mercado relevante para a aquisição. Essa restrição é essencial, pois a base corporativa possui milhões de registros em escala global, e em mercados grandes como os Estados Unidos o volume ultrapassa 470 mil clientes.
 - **Cache local em CSV**, armazenado em `CACHE_FOLDER`. Na primeira execução para um país, o resultado da consulta é persistido localmente; em execuções subsequentes, os dados são lidos diretamente do arquivo de cache, evitando reconsultas desnecessárias ao banco. Essa abordagem é adequada ao contexto do projeto, já que a estrutura de clientes é definida no início do ano e tende a permanecer estável ao longo do ciclo.
 
-A consulta retorna, para cada cliente, os seguintes campos principais: identificador e nome da cobertura (`COV_TYPE_ID`), grupos globais e domésticos de buying group (`GBL_BUY_GRP`, `DOM_BUY_GRP`), identificador e nome do global client, nome legal do cliente, listas de segmentação válidas (`acct_list_ids`), indústria e país.
+A consulta retorna, para cada cliente, os seguintes campos principais: identificador e nome da cobertura (`COV_TYPE_ID`), grupos globais e domésticos de buying group (`GBL_BUY_GRP`, `DOM_BUY_GRP`), identificador e nome do global client, nome legal do cliente, listas de segmentação válidas (`acct_list_ids`), indústria e país. Filtros adicionais garantem que apenas clientes ativos, em tipos de cobertura válidos e pertencentes ao grupo de listas oficial da estrutura comercial sejam retornados.
 
 ![image](https://private-user-images.githubusercontent.com/171187922/567291676-c4cf4bff-5df9-435f-a7b4-e5f035105f13.png)
 
@@ -112,7 +115,7 @@ Figura 2. Total de clientes registrados nos EUA por segmento
 
 #### 3.4 Etapa 2 — Normalização textual
 
-O segundo desafio da solução é lidar com a inconsistência entre os nomes de empresas informados no input e os registrados na base corporativa. Para isso, `utils/matching.py` implementa uma rotina de normalização que reduz diferenças de formatação sem alterar a identidade da empresa. A normalização aplica as seguintes transformações:
+O segundo desafio da solução é lidar com a inconsistência entre os nomes de empresas informados no input e os registrados na base corporativa. Para isso, `utils/normalize.py` implementa uma rotina de normalização que reduz diferenças de formatação sem alterar a identidade da empresa. A normalização aplica as seguintes transformações:
 
 - conversão para minúsculas;
 - remoção de espaços extras e pontuação;
@@ -130,13 +133,12 @@ A comparação entre os nomes do input e os registros da base foi estruturada em
 
 Para o cálculo de similaridade é utilizada a biblioteca **RapidFuzz**, especializada em comparação aproximada de strings, que retorna um **score de similaridade entre 0 e 100**. A técnica de fuzzy matching mede o grau de proximidade mesmo na presença de erros de digitação, variações ortográficas ou diferenças de estrutura.
 
-O comportamento do matching é controlado por três parâmetros definidos em `config.py`:
+A etapa de matching trabalha com duas faixas de score:
 
-- `MATCH_LIMIT = 20` — número máximo de candidatos retornados por empresa na etapa de busca.
-- `HIGH_CONFIDENCE_THRESHOLD = 90` — score mínimo para que um candidato seja considerado de alta confiança.
-- `MID_CONFIDENCE_THRESHOLD = 50` — score mínimo para que um candidato seja considerado como fallback, utilizado quando nenhum candidato de alta confiança é encontrado.
+- **Alta confiança** — candidatos com score maior ou igual a **80** são gerados tanto pelo raw matching quanto pelo normalized matching, e compõem a maior parte da saída.
+- **Fallback** — candidatos com score entre **60 e 79** no normalized matching são incluídos apenas quando nenhum candidato de alta confiança foi encontrado para a empresa, garantindo que entradas difíceis ainda recebam sugestões ordenadas por similaridade. Candidatos abaixo de 60 são descartados.
 
-Candidatos com score abaixo de `MID_CONFIDENCE_THRESHOLD` são descartados.
+O número máximo de candidatos retornados por empresa é controlado pelo parâmetro `MATCH_LIMIT` (atualmente fixado em 20 em `config.py`).
 
 O uso de similaridade textual corrige uma distorção típica de abordagens por substring em SQL. Tomando como exemplo a empresa "AON", uma busca por ocorrência parcial de texto retornaria indevidamente registros como "Kaonmedia". Com fuzzy matching combinado aos critérios adicionais de classificação, esse tipo de falso positivo é significativamente reduzido.
 
@@ -150,10 +152,12 @@ Uma contribuição central da modelagem foi estruturar o problema em **grupos de
 |---|---|---|
 | **Grupo 1** | Enterprise Client Expansion, Enterprise Non-Client Expansion, Strategic Client Expansion, Strategic Non-Client Expansion | `COV_TYPE_ID` |
 | **Grupo 2** | Horizon EMEA, Horizon - non-EMEA | `COV_TYPE_ID` |
-| **Grupo 3** | Activate, Growth, BP WW CEID | `GBL_BUY_GRP` (com `DOM_BUY_GRP` em casos específicos) |
-| **Grupo 4** | Activate Unassigned | `GBL_BUY_GRP` (com `DOM_BUY_GRP` em casos específicos) |
+| **Grupo 3** | Activate, Growth, BP WW CEID | `GBL_BUY_GRP` (com exceção descrita abaixo) |
+| **Grupo 4** | Activate Unassigned | `GBL_BUY_GRP` (com exceção descrita abaixo) |
 
-Os Grupos 1 e 2 retornam resultados em nível de `COV_TYPE_ID`, pois nesse contexto o nível de cobertura é o mais apropriado para recomendação. Os Grupos 3 e 4 retornam principalmente em nível de `GBL_BUY_GRP`, com tratamento especial para casos em que a melhor forma de exibição é `DOM_BUY_GRP`.
+Os Grupos 1 e 2 retornam resultados em nível de `COV_TYPE_ID`, pois nesse contexto o nível de cobertura é o mais apropriado para recomendação. Os Grupos 3 e 4 retornam, em regra geral, em nível de `GBL_BUY_GRP`.
+
+Existe, porém, uma exceção bem definida para os Grupos 3 e 4: quando o código `GBL_BUY_GRP` tem três ou quatro caracteres e começa com o prefixo **"ST"** (indicando contas Strategic), a saída é forçada para o nível `DOM_BUY_GRP`. Essa regra reflete a prática comercial da organização, em que esse subconjunto de contas é gerido com granularidade maior que o restante do grupo.
 
 > **Nota:** esses níveis de agrupamento **não se confundem com os segmentos comerciais** apresentados na Seção 2 (Enterprise, Strategic, Select Horizon, Select Territory). Os grupos são agrupamentos operacionais internos da ferramenta, utilizados para aplicar regras de saída e priorização distintas. Os segmentos são uma classificação de negócio da própria empresa.
 
@@ -161,17 +165,17 @@ Para ilustrar a relação entre os níveis de saída, tomemos como exemplo a Pep
 
 #### 3.7 Etapa 5 — Priorização e consolidação
 
-Após a geração dos candidatos para todos os grupos, a ferramenta precisa consolidar uma recomendação final por empresa na aba Summary. Essa lógica é implementada em `utils/process_utils.py` (funções `append_unmatched_companies` e `finalize_details`), usando os mapeamentos definidos em `utils/matching.py`.
+Após a geração dos candidatos para todos os grupos, a ferramenta precisa consolidar uma recomendação final por empresa na aba Summary. Essa lógica é implementada em `utils/summary.py` (função `build_summary`), a partir dos candidatos montados em `utils/process_utils.py`.
 
-A ordem de priorização aplicada é:
+A priorização trabalha com um threshold mais exigente do que o utilizado na geração de candidatos: a camada de Summary considera apenas candidatos com score **maior ou igual a 90** como de "alta confiança", aplicando a seguinte ordem de decisão para cada empresa:
 
-1. Grupo 1 ou Grupo 2 com score ≥ `HIGH_CONFIDENCE_THRESHOLD` (90)
-2. Grupo 3 com score ≥ `HIGH_CONFIDENCE_THRESHOLD` (90)
-3. Grupo 4 com score ≥ `HIGH_CONFIDENCE_THRESHOLD` (90)
-4. Melhor candidato com score entre `MID_CONFIDENCE_THRESHOLD` e `HIGH_CONFIDENCE_THRESHOLD` (50 a 90)
+1. Grupo 1 ou Grupo 2 com score ≥ 90
+2. Grupo 3 com score ≥ 90
+3. Grupo 4 com score ≥ 90
+4. Melhor candidato com score entre 50 e 89, em qualquer grupo
 5. Cliente não encontrado
 
-Nos Grupos 3 e 4, quando múltiplos candidatos de alta confiança existem para a mesma conta, a ferramenta prioriza registros em nível de `GBL_BUY_GRP` quando disponíveis. Quando ainda assim permanecem múltiplos registros relevantes, eles são consolidados em uma única linha no Summary, com uma mensagem que direciona a revisão humana para a aba Details.
+Nos Grupos 3 e 4, quando múltiplos candidatos de alta confiança existem para a mesma conta, a ferramenta prioriza registros em nível de `GBL_BUY_GRP`. Quando uma mesma conta (`ACCT`) aparece associada a mais de um `GBL_CLIENT_ID`, os registros são consolidados em uma única linha no Summary, preenchida com a mensagem *"Multiple Global Client IDs - check Details tab"*, direcionando o analista à aba Details para a decisão final.
 
 Como os candidatos podem surgir a partir de mais de uma etapa de matching (raw e normalizado), foi necessário implementar uma **estratégia de deduplicação** baseada em atributos-chave do resultado, reduzindo repetições e melhorando a qualidade da saída final.
 
@@ -187,7 +191,7 @@ A última etapa é construída em `utils/summary.py` e `utils/metrics.py`, invoc
 
 **Details** — Todos os candidatos encontrados pelo motor de matching, com score, nível da conta, atributos de cobertura, buying group, global client, grupo de origem e lista de segmentação.
 
-**Metrics** — Métricas de execução e qualidade, incluindo número de empresas processadas, empresas encontradas e não encontradas, percentuais de cobertura, distribuição de matches por grupo, quantidade de matches de alta confiança, empresas com múltiplos resultados, tempo total de execução, tempo por grupo e tempo médio por empresa processada.
+**Metrics** — Métricas de execução e qualidade organizadas em quatro blocos: visão geral (total de empresas processadas, encontradas e não encontradas, percentuais de cobertura, matches de alta confiança), tempos de execução (total e por grupo, incluindo comparativo entre os modos sequencial e paralelo quando o benchmark está ativo), distribuição de matches por grupo e distribuição de confiança do Summary por faixa de score.
 
 ![image](https://private-user-images.githubusercontent.com/171187922/567294200-49fc9f46-24fb-42c8-aaca-ae46ae8dbe38.png)
 ![image](https://private-user-images.githubusercontent.com/171187922/567294262-8ffb9f3f-b657-4ef2-9ac5-a3554a40b7f9.png)
@@ -209,44 +213,6 @@ O modo padrão é controlado por `DEFAULT_EXECUTION_MODE = "sequential"`. Adicio
 
 O benchmark mostrou que, no ambiente testado, a execução sequencial apresentou desempenho total superior à paralela. Esse resultado indica que o workload é predominantemente **CPU-bound** — o overhead de criação e sincronização de threads supera os ganhos potenciais de concorrência, limitados pelo GIL do Python para tarefas desse tipo. Com base nessa evidência, a execução sequencial passou a ser o modo padrão, mantendo o benchmark como opção para análises futuras (por exemplo, caso se migre a paralelização para `ProcessPoolExecutor` ou para uma execução distribuída).
 
-
-### 3. Metodologia
-
-A metodologia adotada neste trabalho foi estruturada em etapas sequenciais, com o objetivo de reproduzir e automatizar o processo manual de mapeamento de clientes. O fluxo completo da solução pode ser descrito da seguinte forma:
-
-1. **Recebimento do input**
-   - Lista de clientes fornecida por gestores, contendo apenas nomes de empresas e país.
-
-2. **Extração de dados**
-   - Consulta à base corporativa via SQL.
-   - Filtragem por país para reduzir volume.
-   - Armazenamento em cache local para reutilização.
-
-3. **Normalização textual**
-   - Conversão para minúsculas.
-   - Remoção de pontuação e espaços extras.
-   - Remoção de sufixos societários (Inc, Ltda, Corp, etc).
-   - Remoção de palavras irrelevantes (stopwords).
-
-4. **Matching de nomes**
-   - Comparação direta (raw matching).
-   - Comparação normalizada (normalized matching).
-   - Cálculo de similaridade utilizando fuzzy matching (RapidFuzz).
-
-5. **Classificação de candidatos**
-   - Separação por grupos de negócio (Grupos 1 a 4).
-   - Identificação de nível (COV_TYPE_ID, GBL_BUY_GRP, etc).
-
-6. **Priorização**
-   - Aplicação de regras hierárquicas para definição do melhor candidato.
-   - Consolidação dos resultados.
-
-7. **Geração de outputs**
-   - Aba Summary com recomendação final.
-   - Aba Details com todos os candidatos.
-   - Aba Metrics com indicadores de execução.
-
-Esse fluxo permite transformar um processo manual em uma pipeline estruturada e reprodutível.
 
 ### 4. Modelagem
 A modelagem da solução foi estruturada para reproduzir, de forma padronizada e escalável, a etapa inicial do processo de integração de vendedores oriundos de aquisições. Na prática, esse processo começa quando um gerente de vendas envia uma lista de clientes que devem ser incorporados ao território de sua equipe. Essa lista normalmente contém apenas os nomes das empresas, sem padronização e sem referência direta aos identificadores utilizados na base corporativa. A partir dessa entrada, iniciam-se as etapas críticas do fluxo.
