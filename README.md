@@ -231,50 +231,94 @@ Ao longo do desenvolvimento, algumas decisões exigiram iteração e refinamento
 
 **Escolha entre execução sequencial e paralela.** A paralelização por grupos via `ThreadPoolExecutor` foi implementada esperando ganho de tempo, mas o benchmark descrito em 3.9 revelou que a versão sequencial é mais rápida no ambiente atual. Essa decisão baseada em medição é um bom exemplo de como a ferramenta incorporou observabilidade do próprio desempenho (aba Metrics) como critério de escolha, em vez de assumir que paralelismo seria sempre preferível.
 
-### 4. Resultados 
+### 4. Resultados
 
-O principal resultado do projeto foi transformar um processo altamente manual em uma solução majoritariamente automatizada, estruturada e orientada por regras de negócio, aplicando conceitos de sistemas inteligentes de apoio à decisão diretamente em um processo corporativo real, complexo e sensível para o negócio.
+O principal resultado deste trabalho foi a transformação de um processo predominantemente manual, custoso e pouco escalável em uma solução automatizada, estruturada e orientada por regras de negócio, aplicando conceitos de sistemas inteligentes de apoio à decisão diretamente em um processo corporativo real, complexo e sensível para a operação comercial da empresa.
 
-A aplicação desenvolvida se mostrou capaz de processar centenas de entradas em segundos, mostrando grande aumento de eficiência em comparação a análise manual que leva cerca de 4 minutos por registro. Para alguns casos podem ser necessários algum tipo de análise individual ainda, mas o output já fornece as informações necessárias e porcentagem de similaridide para auxílio à tomada de decisão. Reduzindo o tempo gasto em um processo completo que envolvia diversas pessoas e durava dias, podendo hoje ser executado por apenas uma pessoa.
+#### 4.1 Ganho operacional
 
-Como contribuição técnica, o projeto integra:
-- conexão com DB2
-- extração estruturada de dados
-- normalização textual
-- fuzzy matching
-- classificação através de regras hierárquicas de priorização
-- mensuração de performance e qualidade
-- output estruturado para decisão
+O ponto mais imediato do impacto da solução é a mudança de escala temporal do processo. Sob a abordagem manual, cada cliente da lista recebida do gestor exigia em média cerca de quatro minutos de análise individual: consulta à base corporativa via intranet, comparação textual entre o nome informado e o nome legal registrado, interpretação da estrutura comercial aplicável e decisão sobre o nível mais adequado da hierarquia. Em integrações de aquisição com centenas de clientes, esse esforço se acumulava em vários dias de trabalho de uma equipe inteira.
 
-Os resultados do projeto mostram que a automação não apenas reduz o esforço de busca e comparação textual, mas também apoia uma decisão mais sofisticada: recomendar o nível mais adequado dentro de uma estrutura comercial hierárquica, na qual diferentes segmentos e coberturas possuem papéis distintos na definição dos territórios.
+Com a ferramenta, o mesmo volume de entradas passou a ser processado em segundos, com a análise individual restrita aos casos efetivamente ambíguos. Em termos práticos, isso significa que um processo que antes demandava o envolvimento de uma equipe ao longo de dias passou a poder ser executado por um único analista em uma sessão de trabalho. Para esses casos ambíguos, o output já entrega as informações necessárias e o score de similaridade que apoiam a tomada de decisão, eliminando a etapa de busca e estruturação manual que consumia a maior parte do tempo.
 
-A ferramenta também fornece suporte à decisão mesmo em casos ambíguos, ao apresentar múltiplos candidatos com score de similaridade e atributos relevantes. Mesmo quando a ferramenta não consegue decidir automaticamente uma única resposta ideal, ela ainda gera valor relevante ao reduzir o universo de busca e apresentar os candidatos mais plausíveis de forma organizada, deixando claro onde há conflito e onde a revisão humana é necessária. Há espaço para melhoria com a inclusão de outras técnicas de comparação de string, considerando também a estrutura do modelo da empresa.
+#### 4.2 Qualidade e suporte à decisão
 
-Um exemplo da presença de registros desatualizados e irrelevantes que dificultam o processo atual é o cliente MGM studios presente abaixo, que foi vendido da Disney para Amazon em 2022, embora ambos registros ainda permaneçam no sistema.
+A automação proposta vai além da simples redução de esforço operacional. A ferramenta apoia uma decisão tecnicamente mais sofisticada do que a comparação textual isolada: ela recomenda o nível mais adequado dentro de uma estrutura comercial hierárquica, na qual diferentes segmentos e tipos de cobertura possuem papéis distintos na definição dos territórios de venda. Esse tratamento por grupos de negócio, com regras de saída e priorização específicas, é o que diferencia o sistema de um simples mecanismo de busca textual.
+
+Em casos ambíguos, em que nenhum candidato isolado é claramente o melhor, a ferramenta continua agregando valor: ao invés de uma resposta única e potencialmente errada, ela apresenta um conjunto reduzido e ordenado de candidatos plausíveis, com score de similaridade e atributos relevantes para a decisão final. O Summary destaca explicitamente essas situações por meio de realces visuais (azul claro para empresas com múltiplas linhas, amarelo para clientes não encontrados, laranja claro para registros de Activate Unassigned), direcionando a atenção do analista para onde de fato é necessária. O resultado é uma divisão de trabalho mais inteligente entre máquina e ser humano: a máquina filtra e ordena, o analista decide.
+
+A padronização proporcionada pela ferramenta também contribui para a consistência das recomendações entre execuções e entre analistas distintos. Em vez de depender da experiência individual de quem conduz a análise, o processo passa a seguir um conjunto explícito de regras documentadas em código, o que melhora a governança e reduz a variabilidade dos mapeamentos.
+
+#### 4.3 Limitações observadas e qualidade da base
+
+A análise dos resultados expôs também limitações estruturais da base corporativa que vão além do escopo da ferramenta, mas que afetam diretamente a qualidade dos mapeamentos. Um exemplo ilustrativo é o caso da MGM Studios: vendida pela Disney à Amazon em 2022, ainda aparece em ambos os registros no sistema, gerando candidatos concorrentes para a mesma entrada de input. Casos como esse mostram que, mesmo com uma estratégia de matching robusta, a presença de registros desatualizados na base pode produzir ambiguidades que nenhuma técnica textual resolveria sozinha.
 
 <img width="975" height="100" alt="image" src="https://github.com/user-attachments/assets/0345b1f9-053f-4c58-b236-8b44f908351e" />
+
 Figura 6. Exemplo de dados desatualizados no sistema
+
+Essa observação é, ela própria, um resultado relevante do trabalho: ao expor de forma sistemática situações que antes ficavam diluídas no esforço manual, a ferramenta evidencia oportunidades concretas de melhoria de qualidade de dados na origem.
+
+#### 4.4 Adoção da solução no ambiente corporativo
+
+O resultado mais significativo do projeto, do ponto de vista de validação, foi sua adoção como ferramenta operacional no ambiente corporativo. Após apresentação à área responsável e validação dos resultados em casos reais de aquisição, a solução foi formalmente aprovada para uso e incorporada ao processo de integração de vendedores sob o nome **Acquisition Client Locator (ACL)**.
+
+Essa adoção tem várias implicações que reforçam a relevância prática do trabalho:
+
+- **Validação por usuários reais.** A ferramenta está sendo usada por analistas que conhecem profundamente o processo manual original. A aprovação por essa audiência crítica é um indicador forte de que a solução atende às necessidades operacionais reais e não apenas às idealizadas em projeto.
+- **Substituição de um processo estabelecido.** O ACL substituiu, na prática, o fluxo manual baseado em planilhas e consultas individuais. Isso exigiu não apenas a qualidade técnica da ferramenta, mas também confiança suficiente da equipe para reorganizar uma rotina consolidada.
+- **Estabelecimento como padrão operacional.** Ao receber um nome próprio e ser incorporada ao fluxo oficial, a solução passou a integrar a infraestrutura informal da área, o que tende a garantir uso continuado e criar demanda natural por evolução.
+- **Visibilidade interna.** A adoção transformou o projeto em um caso concreto dentro da empresa, gerando inclusive a discussão inicial sobre simplificação mais ampla do processo de mapeamento, com possibilidade de migração para plataformas corporativas como SAP e Salesforce no médio prazo.
+
+#### 4.5 Síntese técnica
+
+Como contribuição técnica, o projeto integra em uma única pipeline coerente um conjunto de elementos que normalmente aparecem isolados em soluções pontuais:
+
+- conexão direta com a base corporativa em DB2 e extração estruturada de dados;
+- normalização textual com preservação simultânea do nome original;
+- fuzzy matching com biblioteca especializada (RapidFuzz);
+- agrupamento por regras de negócio com mapeamentos de saída específicos por grupo;
+- priorização hierárquica com thresholds de confiança em duas camadas;
+- mensuração contínua de performance e qualidade via aba Metrics dedicada;
+- output estruturado em três abas com realces visuais para revisão humana.
+
+Essa integração é o que permite que o ACL ofereça, com o mesmo arquivo Excel de saída, uma camada de recomendação direta (Summary), uma camada de análise detalhada (Details) e uma camada de observabilidade do próprio processo (Metrics).
+
+---
 
 ### 5. Conclusões
 
-Este trabalho teve como objetivo reduzir a dependência de um processo manual, demorado e pouco escalável no mapeamento de clientes oriundos de aquisições, etapa crítica para a integração de vendedores em uma grande empresa de tecnologia. 
+Este trabalho teve como objetivo reduzir a dependência de um processo manual, demorado e pouco escalável no mapeamento de clientes oriundos de aquisições — etapa crítica para a integração de vendedores em uma grande empresa de tecnologia, com impacto direto na definição de territórios, metas e remuneração variável.
 
-A solução proposta demonstrou que é possível estruturar esse processo por meio da combinação de técnicas de processamento de linguagem natural e regras de negócio, transformando uma atividade predominantemente manual em uma pipeline automatizada, reprodutível e orientada à decisão.
+A solução proposta demonstrou que é possível estruturar esse processo por meio da combinação de técnicas de processamento de linguagem natural e regras de negócio, transformando uma atividade predominantemente manual em uma pipeline automatizada, reprodutível e orientada à decisão. Os resultados obtidos confirmam a viabilidade técnica da abordagem e, principalmente, sua aderência às necessidades reais do negócio.
 
-Do ponto de vista prático, o projeto gerou ganhos relevantes de eficiência operacional, reduzindo significativamente o tempo necessário para análise e permitindo que um processo que antes demandava vários dias de trabalho de uma equipe seja executado em poucos minutos por um único analista. Além disso, a padronização das recomendações contribui para maior consistência nas decisões e melhor governança do processo.
+Do ponto de vista prático, três ganhos se destacam. O primeiro é o **ganho de eficiência operacional**: a redução de tempo é da ordem de várias dias-pessoa para uma sessão de trabalho de um único analista, liberando capacidade da equipe para atividades de maior valor agregado. O segundo é o **ganho de consistência**: ao codificar as regras de mapeamento, a solução garante que decisões equivalentes sejam tomadas para entradas equivalentes, reduzindo a variabilidade introduzida pelo julgamento individual. O terceiro é o **ganho de governança**: o output estruturado, com score de similaridade, candidatos alternativos e métricas de execução, deixa rastro auditável do raciocínio aplicado em cada recomendação.
 
-Um dos principais diferenciais da solução está na capacidade de não apenas identificar correspondências textuais, mas também recomendar o nível mais adequado dentro de uma estrutura comercial hierárquica, respeitando as regras de segmentação e priorização da organização. Isso aproxima a ferramenta de um sistema de apoio à decisão, e não apenas de um mecanismo de busca.
+Um diferencial importante do projeto está em ter ido além da identificação textual de correspondências. A solução incorpora a hierarquia comercial da organização, com seus segmentos, grupos e níveis de cobertura, e aplica regras de priorização que refletem a prática operacional. É essa camada de regras de negócio embutidas que aproxima a ferramenta de um efetivo sistema de apoio à decisão, e não apenas de um motor de busca aproximada.
 
-Como evidência de sua aplicabilidade, a solução foi apresentada no ambiente corporativo e aprovada para uso real, sendo adotada como modelo operacional sob o nome Acquisition Client Locator (ACL). Esse resultado reforça a relevância prática do projeto e sua aderência às necessidades do negócio.
+A evidência mais forte da relevância prática do trabalho é a adoção da solução no ambiente corporativo sob o nome **Acquisition Client Locator (ACL)**. A transição de um experimento de MBA para uma ferramenta efetivamente utilizada em integrações reais de aquisição valida o desenho técnico e mostra que a solução respondeu a uma dor concreta do negócio. Essa adoção também posicionou o projeto como referência interna para discussões mais amplas sobre simplificação e modernização do processo de mapeamento.
 
-Apesar dos resultados positivos, o trabalho apresenta algumas limitações. Como trabalhos futuros, destacam-se oportunidades relevantes de evolução, incluindo:
-- o refinamento contínuo das regras de priorização;
-- a incorporação de técnicas mais avançadas de NLP, como embeddings semânticos, para melhorar o tratamento de ambiguidades;
-- a evolução da camada de apresentação, tornando a solução mais acessível a usuários não técnicos;
+Por fim, o trabalho reforça uma reflexão de natureza mais ampla sobre o papel de soluções de apoio à decisão em ambientes corporativos: o maior ganho não veio de algoritmos sofisticados isolados, mas da combinação cuidadosa de técnicas relativamente simples (fuzzy matching, normalização textual, regras hierárquicas) com um entendimento profundo do problema de negócio. A modelagem das regras de priorização e a estruturação dos grupos de contas exigiram tanto trabalho quanto a parte algorítmica — e foi essa integração entre técnica e domínio que permitiu o resultado final.
 
-Essas melhorias podem ampliar ainda mais o impacto da solução, aumentando sua precisão, escalabilidade e adoção dentro do ambiente corporativo. 
+#### Trabalhos Futuros
 
-Como consequência do projeto há uma discussão inicial para simplificação do processo e estudo para migração para plataformas existentes no mercado, como SAP e SalesForce.
+Apesar dos resultados alcançados, o projeto apresenta limitações conhecidas e várias frentes naturais de evolução. Algumas delas já foram identificadas durante o uso da ferramenta no ambiente corporativo e podem ampliar significativamente o impacto da solução.
+
+**Avaliação quantitativa sistemática.** A próxima etapa de evolução mais imediata é a construção de um conjunto de teste rotulado (golden set) com casos representativos de cada grupo de negócio, permitindo medir métricas formais como acurácia top-1, acurácia top-k, precisão e recall do matching. Essa avaliação permitiria também calibrar de forma fundamentada os thresholds de confiança hoje definidos empiricamente.
+
+**Incorporação de técnicas avançadas de NLP.** A estratégia atual baseada em fuzzy matching textual é eficaz para a maioria dos casos, mas tem limitações em situações de ambiguidade semântica (como o exemplo "As America" descrito na Seção 3.5). A incorporação de embeddings semânticos via modelos pré-treinados (como sentence-transformers) poderia melhorar significativamente o tratamento desses casos, ao capturar similaridade de significado e não apenas de forma.
+
+**Refinamento contínuo das regras de priorização.** A estrutura atual de quatro grupos com regras de saída específicas atende ao modelo comercial atual, mas é razoável esperar que ajustes sejam necessários a cada ciclo de planejamento. Documentar e versionar essas regras, e potencialmente extrair sua configuração para um arquivo externo editável por usuários de negócio, tornaria a manutenção menos dependente de mudanças no código.
+
+**Adaptação por mercado e país.** Como discutido na Seção 3.10, a estrutura de cobertura pode variar entre países. Uma evolução natural seria permitir configurações de grupos e exceções específicas por mercado, sem perder a unidade do modelo global.
+
+**Evolução da camada de apresentação.** O output atual em Excel é eficiente para analistas familiarizados com o processo, mas limita a adoção por outros perfis. Uma interface web simples, possivelmente em Streamlit ou Flask, poderia tornar a ferramenta acessível a usuários não técnicos, com upload de arquivo, escolha de país e visualização interativa dos resultados.
+
+**Loop de aprendizado a partir das correções manuais.** Cada vez que um analista corrige manualmente uma recomendação do Summary, está produzindo um sinal valioso sobre onde a ferramenta erra. Capturar essas correções de forma estruturada, com posterior análise agregada, permitiria identificar padrões de erro e priorizar melhorias com base em evidência, em vez de intuição.
+
+**Integração com plataformas corporativas.** No médio e longo prazo, há discussão interna sobre simplificação mais ampla do processo de mapeamento, possivelmente migrando partes da lógica para plataformas estabelecidas como SAP ou Salesforce. O ACL, nesse cenário, pode servir tanto como referência funcional quanto como prova de conceito do tipo de regras de negócio que precisariam ser implementadas nessas plataformas.
+
+Essas frentes não são mutuamente exclusivas e podem ser priorizadas conforme as necessidades do negócio e a disponibilidade de tempo de desenvolvimento. Em conjunto, sinalizam que o ACL, embora já em produção, ainda tem espaço significativo para crescer em precisão, escalabilidade e alcance dentro da organização.
 
 ### 6. Referências
 
