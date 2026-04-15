@@ -96,7 +96,7 @@ Esta seção descreve os passos necessários para executar a ferramenta localmen
 
 > **Nota sobre privacidade.** O repositório público omite intencionalmente arquivos com credenciais, configurações de servidor e dados reais da empresa. Os caminhos de pastas em `config.py` foram alterados para referências locais genéricas; no uso real, esses caminhos apontam para pastas em armazenamento na nuvem (Box corporativo) compartilhadas entre funcionários autorizados. Da mesma forma, o módulo de credenciais do banco não é versionado e precisa ser recriado localmente conforme descrito em *Configuração* (3.3.3).
 
-#### 3.3.1 Pré-requisitos
+##### 3.3.1 Pré-requisitos
 
 - **Python 3.10 ou superior**
 - **Driver IBM DB2 instalado** (necessário para a biblioteca `ibm_db` se conectar ao banco corporativo). Em Windows, o caminho padrão usado pelo projeto é `C:\Program Files\IBM\SQLLIB\BIN`.
@@ -109,7 +109,7 @@ Para instalar as bibliotecas Python:
 pip install pandas openpyxl rapidfuzz ibm_db
 ```
 
-#### 3.3.2 Instalação
+##### 3.3.2 Instalação
 
 Recomenda-se a criação de um ambiente virtual antes da instalação das dependências:
 
@@ -123,7 +123,7 @@ source venv/bin/activate
 pip install pandas openpyxl rapidfuzz ibm_db
 ```
 
-#### 3.3.3 Configuração
+##### 3.3.3 Configuração
 
 **Passo 1 — Editar `config.py`.** Ajuste os três caminhos no topo do arquivo para pastas existentes na sua máquina:
 
@@ -159,7 +159,7 @@ Substitua os valores entre colchetes pelos dados de acesso fornecidos internamen
 | `RUN_BENCHMARK` | `False` | Quando `True`, executa modos sequencial e paralelo na mesma rodada e seleciona o mais rápido. |
 | `DEFAULT_EXECUTION_MODE` | `"sequential"` | Modo padrão quando o benchmark não está ativo. Aceita `"sequential"` ou `"parallel"`. |
 
-#### 3.3.4 Formato do arquivo de input
+##### 3.3.4 Formato do arquivo de input
 
 O arquivo de input deve ser um Excel (`.xlsx`) colocado na pasta `INPUT_FOLDER`. A única coluna obrigatória é:
 
@@ -169,7 +169,7 @@ O país associado à execução é informado interativamente no momento da execu
 
 Exemplos de inputs e outputs reais (com dados anonimizados ou de demonstração) podem ser consultados na pasta [`results/`](https://github.com/leopcdata/bimaster_final/tree/main/results) do repositório.
 
-#### 3.3.5 Execução
+##### 3.3.5 Execução
 
 A partir da raiz do projeto, execute:
 
@@ -195,7 +195,7 @@ O screenshot abaixo mostra um exemplo do fluxo interativo no terminal:
 <img width="975" height="470" alt="image" src="https://github.com/user-attachments/assets/20f987d0-7eb3-4b40-a00b-441dee1a406f" />
 Figura 1. Terminal de execução no VS code
 
-#### 3.3.6 Modos de execução e benchmark
+##### 3.3.6 Modos de execução e benchmark
 
 O modo de execução padrão é **sequencial**, definido por `DEFAULT_EXECUTION_MODE = "sequential"` em `config.py`. Esse modo se mostrou mais eficiente nos testes realizados, por motivos discutidos em *3.5 Estratégia de execução e benchmark*.
 
@@ -226,7 +226,7 @@ Figura 2. Exemplo de entrada do processo - Lista fornecida por um gestor
 
 Figura 3. Total de clientes registrados nos EUA por segmento
 
-#### 3.4.2 Normalização textual
+##### 3.4.2 Normalização textual
 
 O segundo desafio da solução é lidar com a inconsistência entre os nomes de empresas informados no input e os registrados na base corporativa. Para isso, `utils/normalize.py` implementa uma rotina de normalização que reduz diferenças de formatação sem alterar a identidade da empresa. A normalização aplica as seguintes transformações:
 
@@ -237,7 +237,7 @@ O segundo desafio da solução é lidar com a inconsistência entre os nomes de 
 
 Uma decisão importante do projeto foi **preservar simultaneamente o nome original e sua versão normalizada**. A normalização não substitui a comparação bruta; ela atua como uma camada complementar, permitindo que o matching use as duas representações em sequência.
 
-#### 3.4.3 Estratégia de matching
+##### 3.4.3 Estratégia de matching
 
 A comparação entre os nomes do input e os registros da base foi estruturada em duas abordagens complementares e sequenciais, com o objetivo de equilibrar precisão textual e flexibilidade diante de variações de escrita:
 
@@ -257,7 +257,7 @@ O uso de similaridade textual corrige uma distorção típica de abordagens por 
 
 Ainda assim, alguns casos permanecem ambíguos. Um exemplo é a entrada "As America, Inc", que pode retornar scores semelhantes para nomes como "Asm America" e "JAS America". Situações como essa indicam espaço para evolução, seja pela criação de regras adicionais baseadas na hierarquia de negócio, seja pela incorporação de técnicas complementares como embeddings semânticos.
 
-#### 3.4.4 Agrupamento por regras de negócio
+##### 3.4.4 Agrupamento por regras de negócio
 
 Uma contribuição central da modelagem foi estruturar o problema em **grupos de contas com regras de saída e prioridades distintas**, em vez de tratar toda a base da mesma forma. Os registros são organizados em quatro grupos, configurados em `GROUP_CONFIG` dentro de `config.py`:
 
@@ -276,7 +276,7 @@ Existe, porém, uma exceção bem definida para os Grupos 3 e 4: quando o códig
 
 Para ilustrar a relação entre os níveis de saída, tomemos como exemplo a PepsiCo: a organização PepsiCo como um todo corresponde à estrutura principal (`COV_TYPE_ID`); a divisão entre bebidas e alimentos é representada por diferentes `GBL_BUY_GRP`; e suas marcas individuais correspondem a diferentes `DOM_BUY_GRP`. Essa hierarquia permite diferentes coberturas comerciais para um mesmo conglomerado.
 
-#### 3.4.5 Priorização e consolidação
+##### 3.4.5 Priorização e consolidação
 
 Após a geração dos candidatos para todos os grupos, a ferramenta precisa consolidar uma recomendação final por empresa na aba Summary. Essa lógica é implementada em `utils/summary.py` (função `build_summary`), a partir dos candidatos montados em `utils/process_utils.py`.
 
@@ -292,7 +292,7 @@ Nos Grupos 3 e 4, quando múltiplos candidatos de alta confiança existem para a
 
 Como os candidatos podem surgir a partir de mais de uma etapa de matching (raw e normalizado), foi necessário implementar uma **estratégia de deduplicação** baseada em atributos-chave do resultado, reduzindo repetições e melhorando a qualidade da saída final.
 
-#### 3.4.6 Geração de outputs
+##### 3.4.6 Geração de outputs
 
 A última etapa é construída em `utils/summary.py` e `utils/metrics.py`, invocadas por `main.py` ao final da execução. O resultado é um único arquivo Excel com três abas:
 
