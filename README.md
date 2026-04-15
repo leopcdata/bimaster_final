@@ -157,7 +157,7 @@ Uma contribuição central da modelagem foi estruturar o problema em **grupos de
 
 Os Grupos 1 e 2 retornam resultados em nível de `COV_TYPE_ID`, pois nesse contexto o nível de cobertura é o mais apropriado para recomendação. Os Grupos 3 e 4 retornam, em regra geral, em nível de `GBL_BUY_GRP`.
 
-Existe, porém, uma exceção bem definida para os Grupos 3 e 4: quando o código `GBL_BUY_GRP` tem três ou quatro caracteres e começa com o prefixo **"ST"** (indicando contas Strategic), a saída é forçada para o nível `DOM_BUY_GRP`. Essa regra reflete a prática comercial da organização, em que esse subconjunto de contas é gerido com granularidade maior que o restante do grupo.
+Existe, porém, uma exceção bem definida para os Grupos 3 e 4: quando o código `GBL_BUY_GRP` tem três ou quatro caracteres e começa com o prefixo **"ST"** (indicando contas menores agrupadas por Estado (State) e Indústria), a saída é forçada para o nível `DOM_BUY_GRP`. Essa regra reflete a prática comercial da organização, em que esse subconjunto de contas é gerido com granularidade maior que o restante do grupo.
 
 > **Nota:** esses níveis de agrupamento **não se confundem com os segmentos comerciais** apresentados na Seção 2 (Enterprise, Strategic, Select Horizon, Select Territory). Os grupos são agrupamentos operacionais internos da ferramenta, utilizados para aplicar regras de saída e priorização distintas. Os segmentos são uma classificação de negócio da própria empresa.
 
