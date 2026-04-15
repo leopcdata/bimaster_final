@@ -219,11 +219,11 @@ A consulta retorna, para cada cliente, os seguintes campos principais: identific
 
 <img width="539" height="303" alt="image" src="https://github.com/user-attachments/assets/c4cf4bff-5df9-435f-a7b4-e5f035105f13" />
 
-Figura 3. Exemplo de entrada do processo - Lista fornecida por um gestor
+Figura 2. Exemplo de entrada do processo - Lista fornecida por um gestor
 
 <img width="629" height="334" alt="image" src="https://github.com/user-attachments/assets/032cc20f-c483-49ce-ac72-3153b1de954c" />
 
-Figura 4. Total de clientes registrados nos EUA por segmento
+Figura 3. Total de clientes registrados nos EUA por segmento
 
 #### 3.4.2 — Normalização textual
 
@@ -303,7 +303,7 @@ A última etapa é construída em `utils/summary.py` e `utils/metrics.py`, invoc
 
 <img width="886" height="250" alt="image" src="https://github.com/user-attachments/assets/af6640f2-4002-476e-9065-bd7802060717" />
 
-Figura 5. Exemplo de um resultado prático da aplicação
+Figura 4. Exemplo de um resultado prático da aplicação
 
 **Details** — Todos os candidatos encontrados pelo motor de matching, com score, nível da conta, atributos de cobertura, buying group, global client, grupo de origem e lista de segmentação.
 
@@ -313,7 +313,7 @@ Figura 5. Exemplo de um resultado prático da aplicação
 
 <img width="394" height="262" alt="image" src="https://github.com/user-attachments/assets/8ffb9f3f-b657-4ef2-9ac5-a3554a40b7f9" />
 
-Figuras 6 e 7. Resultados de métricas
+Figuras 5 e 6. Resultados de métricas
 
 
 #### 3.5 Estratégia de execução e benchmark
@@ -367,7 +367,7 @@ A análise dos resultados expôs também limitações estruturais da base corpor
 
 <img width="975" height="100" alt="image" src="https://github.com/user-attachments/assets/0345b1f9-053f-4c58-b236-8b44f908351e" />
 
-Figura 8. Exemplo de dados desatualizados no sistema
+Figura 7. Exemplo de dados desatualizados no sistema
 
 Essa observação é, ela própria, um resultado relevante do trabalho: ao expor de forma sistemática situações que antes ficavam diluídas no esforço manual, a ferramenta evidencia oportunidades concretas de melhoria de qualidade de dados na origem.
 
