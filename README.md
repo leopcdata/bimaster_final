@@ -189,12 +189,14 @@ O resultado é gravado na pasta `RESULTS_FOLDER` como um arquivo Excel com nome 
 ```
 <nome_do_input> ACL results - <YYYY-MM-DD_HH-MM>.xlsx
 ```
+Esse arquivo contém as três abas descritas — **Summary**, **Details** e **Metrics**.
 
-Esse arquivo contém as três abas descritas na Seção 3.8 — **Summary**, **Details** e **Metrics**.
+<img width="975" height="470" alt="image" src="https://github.com/user-attachments/assets/20f987d0-7eb3-4b40-a00b-441dee1a406f" />
+Figura 1. Terminal de execução no VS code
 
 #### 3.3.6 Modos de execução e benchmark
 
-O modo de execução padrão é **sequencial**, definido por `DEFAULT_EXECUTION_MODE = "sequential"` em `config.py`. Esse modo se mostrou mais eficiente nos testes realizados, pelos motivos discutidos na Seção 3.9.
+O modo de execução padrão é **sequencial**, definido por `DEFAULT_EXECUTION_MODE = "sequential"` em `config.py`. Esse modo se mostrou mais eficiente nos testes realizados, por motivos discutidos posteriormente
 
 Para executar em modo **paralelo**, basta alterar a constante para `"parallel"`.
 
@@ -217,11 +219,11 @@ A consulta retorna, para cada cliente, os seguintes campos principais: identific
 
 <img width="539" height="303" alt="image" src="https://github.com/user-attachments/assets/c4cf4bff-5df9-435f-a7b4-e5f035105f13" />
 
-Figura 1. Exemplo de entrada do processo - Lista fornecida por um gestor
+Figura 3. Exemplo de entrada do processo - Lista fornecida por um gestor
 
 <img width="629" height="334" alt="image" src="https://github.com/user-attachments/assets/032cc20f-c483-49ce-ac72-3153b1de954c" />
 
-Figura 2. Total de clientes registrados nos EUA por segmento
+Figura 4. Total de clientes registrados nos EUA por segmento
 
 #### 3.4.2 — Normalização textual
 
@@ -301,7 +303,7 @@ A última etapa é construída em `utils/summary.py` e `utils/metrics.py`, invoc
 
 <img width="886" height="250" alt="image" src="https://github.com/user-attachments/assets/af6640f2-4002-476e-9065-bd7802060717" />
 
-Figura 3. Exemplo de um resultado prático da aplicação
+Figura 5. Exemplo de um resultado prático da aplicação
 
 **Details** — Todos os candidatos encontrados pelo motor de matching, com score, nível da conta, atributos de cobertura, buying group, global client, grupo de origem e lista de segmentação.
 
@@ -311,7 +313,7 @@ Figura 3. Exemplo de um resultado prático da aplicação
 
 <img width="394" height="262" alt="image" src="https://github.com/user-attachments/assets/8ffb9f3f-b657-4ef2-9ac5-a3554a40b7f9" />
 
-Figuras 4 e 5. Resultados de métricas
+Figuras 6 e 7. Resultados de métricas
 
 
 #### 3.5 Estratégia de execução e benchmark
@@ -365,7 +367,7 @@ A análise dos resultados expôs também limitações estruturais da base corpor
 
 <img width="975" height="100" alt="image" src="https://github.com/user-attachments/assets/0345b1f9-053f-4c58-b236-8b44f908351e" />
 
-Figura 6. Exemplo de dados desatualizados no sistema
+Figura 8. Exemplo de dados desatualizados no sistema
 
 Essa observação é, ela própria, um resultado relevante do trabalho: ao expor de forma sistemática situações que antes ficavam diluídas no esforço manual, a ferramenta evidencia oportunidades concretas de melhoria de qualidade de dados na origem.
 
@@ -429,15 +431,6 @@ Apesar dos resultados alcançados, o projeto apresenta limitações conhecidas e
 **Integração com plataformas corporativas.** No médio e longo prazo, há discussão interna sobre simplificação mais ampla do processo de mapeamento, possivelmente migrando partes da lógica para plataformas estabelecidas como SAP ou Salesforce. O ACL, nesse cenário, pode servir tanto como referência funcional quanto como prova de conceito do tipo de regras de negócio que precisariam ser implementadas nessas plataformas.
 
 Essas frentes não são mutuamente exclusivas e podem ser priorizadas conforme as necessidades do negócio e a disponibilidade de tempo de desenvolvimento. Em conjunto, sinalizam que o ACL, embora já em produção, ainda tem espaço significativo para crescer em precisão, escalabilidade e alcance dentro da organização.
-
-### 6. Referências
-
-- Arquivos de solicitação e aplicação real armazenados na pasta [Results](https://github.com/leopcdata/bimaster_final/tree/main/results)   
-
-- Código Python nos arquivos main.py, config.py, benchmark.py da pasta principal desse GitHub, e outras funções auxiliares na pasta [utils](https://github.com/leopcdata/bimaster_final/tree/main/utils)
-
-<img width="975" height="470" alt="image" src="https://github.com/user-attachments/assets/20f987d0-7eb3-4b40-a00b-441dee1a406f" />
-Figura 7. Terminal de execução no VS code
 
 ---
 Matrícula: 232100499
