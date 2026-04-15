@@ -94,7 +94,7 @@ select_input_file → get_country_code → pd.read_excel
 
 Esta seção descreve os passos necessários para executar a ferramenta localmente. A solução foi desenhada para um ambiente corporativo específico, com acesso a uma base DB2 interna, mas pode ser adaptada para fins de avaliação ou demonstração editando os parâmetros descritos abaixo.
 
-> **Nota sobre privacidade.** O repositório público omite intencionalmente arquivos com credenciais, configurações de servidor e dados reais da empresa. Os caminhos de pastas em `config.py` foram alterados para referências locais genéricas; no uso real, esses caminhos apontam para pastas em armazenamento na nuvem (Box corporativo) compartilhadas entre funcionários autorizados. Da mesma forma, o módulo de credenciais do banco não é versionado e precisa ser recriado localmente conforme descrito em 7.3.
+> **Nota sobre privacidade.** O repositório público omite intencionalmente arquivos com credenciais, configurações de servidor e dados reais da empresa. Os caminhos de pastas em `config.py` foram alterados para referências locais genéricas; no uso real, esses caminhos apontam para pastas em armazenamento na nuvem (Box corporativo) compartilhadas entre funcionários autorizados. Da mesma forma, o módulo de credenciais do banco não é versionado e precisa ser recriado localmente conforme descrito em *Configuração* (3.3.3).
 
 #### 3.3.1 Pré-requisitos
 
@@ -189,21 +189,22 @@ O resultado é gravado na pasta `RESULTS_FOLDER` como um arquivo Excel com nome 
 ```
 <nome_do_input> ACL results - <YYYY-MM-DD_HH-MM>.xlsx
 ```
-Esse arquivo contém as três abas descritas — **Summary**, **Details** e **Metrics**.
+Esse arquivo contém as três abas descritas na Seção 3.4.6 — **Summary**, **Details** e **Metrics**.
 
+O screenshot abaixo mostra um exemplo do fluxo interativo no terminal:
 <img width="975" height="470" alt="image" src="https://github.com/user-attachments/assets/20f987d0-7eb3-4b40-a00b-441dee1a406f" />
 Figura 1. Terminal de execução no VS code
 
 #### 3.3.6 Modos de execução e benchmark
 
-O modo de execução padrão é **sequencial**, definido por `DEFAULT_EXECUTION_MODE = "sequential"` em `config.py`. Esse modo se mostrou mais eficiente nos testes realizados, por motivos discutidos posteriormente
+O modo de execução padrão é **sequencial**, definido por `DEFAULT_EXECUTION_MODE = "sequential"` em `config.py`. Esse modo se mostrou mais eficiente nos testes realizados, por motivos discutidos em *3.5 Estratégia de execução e benchmark*.
 
 Para executar em modo **paralelo**, basta alterar a constante para `"parallel"`.
 
 Para ativar o **benchmark** entre os dois modos na mesma execução, altere `RUN_BENCHMARK = True`. Nesse caso, a ferramenta executa as duas estratégias, registra os tempos comparativos na aba Metrics e usa automaticamente o resultado da estratégia mais rápida para o output final.
 
 #### 3.4 Durante a Execução
-#### 3.4.1 — Extração de dados
+#### 3.4.1 Extração de dados
 
 A primeira etapa da solução consiste em obter, da base corporativa, o subconjunto de clientes que será utilizado como universo de busca. Essa etapa é implementada no módulo `utils/db_utils.py` e é acionada por `main.py` logo após a leitura do arquivo de input.
 
@@ -337,11 +338,11 @@ Ao longo do desenvolvimento, algumas decisões exigiram iteração e refinamento
 
 **Representação das regras de negócio em código.** Traduzir a hierarquia comercial (segmentos, grupos, níveis de cobertura, exceções para contas Strategic) em uma lógica programável exigiu várias iterações. A decisão foi concentrar a configuração dos quatro grupos em `GROUP_CONFIG` dentro de `config.py`, com cada grupo associado a uma função de mapeamento de saída específica em `utils/matching.py`. Essa organização deixa explícito o que cada grupo faz e permite ajustes futuros com esforço localizado, sem propagar alterações pelo resto do código.
 
-**Variação entre mercados e países.** A estrutura de cobertura não é universal: cada país pode definir suas próprias regras e estratégias locais para agrupar clientes, desde que alinhadas ao modelo comercial global. Além disso, a estrutura é revisada a cada planejamento anual e depois permanece congelada durante o ciclo de execução. Isso reforça a necessidade de acertar o mapeamento no momento certo, já que a configuração inicial do território terá impacto durante todo o período de vigência do plano de vendas. A parametrização por país e o cache local descritos em 3.3 endereçam parte desse desafio, mas a lógica de grupos e exceções ainda reflete o modelo comercial global — uma evolução natural seria permitir configurações por país.
+**Variação entre mercados e países.** A estrutura de cobertura não é universal: cada país pode definir suas próprias regras e estratégias locais para agrupar clientes, desde que alinhadas ao modelo comercial global. Além disso, a estrutura é revisada a cada planejamento anual e depois permanece congelada durante o ciclo de execução. Isso reforça a necessidade de acertar o mapeamento no momento certo, já que a configuração inicial do território terá impacto durante todo o período de vigência do plano de vendas. A parametrização por país e o cache local descritos em *3.4.1 (Extração de dados)* endereçam parte desse desafio, mas a lógica de grupos e exceções ainda reflete o modelo comercial global — uma evolução natural seria permitir configurações por país.
 
 **Modularização do código.** A primeira versão concentrava responsabilidades de acesso a dados, matching, priorização e apresentação em um único arquivo. À medida que novas funcionalidades foram sendo adicionadas (benchmark, métricas, realces visuais), a manutenção tornou-se progressivamente mais difícil. A reorganização em módulos descrita em 3.2 foi uma refatoração importante: isolou responsabilidades, reduziu acoplamento e tornou mais simples o trabalho de evolução futura.
 
-**Escolha entre execução sequencial e paralela.** A paralelização por grupos via `ThreadPoolExecutor` foi implementada esperando ganho de tempo, mas o benchmark descrito em 3.9 revelou que a versão sequencial é mais rápida no ambiente atual. Essa decisão baseada em medição é um bom exemplo de como a ferramenta incorporou observabilidade do próprio desempenho (aba Metrics) como critério de escolha, em vez de assumir que paralelismo seria sempre preferível.
+**Escolha entre execução sequencial e paralela.** A paralelização por grupos via `ThreadPoolExecutor` foi implementada esperando ganho de tempo, mas o benchmark descrito em 3.5 revelou que a versão sequencial é mais rápida no ambiente atual. Essa decisão baseada em medição é um bom exemplo de como a ferramenta incorporou observabilidade do próprio desempenho (aba Metrics) como critério de escolha, em vez de assumir que paralelismo seria sempre preferível.
 
 ### 4. Resultados
 
@@ -422,7 +423,7 @@ Apesar dos resultados alcançados, o projeto apresenta limitações conhecidas e
 
 **Refinamento contínuo das regras de priorização.** A estrutura atual de quatro grupos com regras de saída específicas atende ao modelo comercial atual, mas é razoável esperar que ajustes sejam necessários a cada ciclo de planejamento. Documentar e versionar essas regras, e potencialmente extrair sua configuração para um arquivo externo editável por usuários de negócio, tornaria a manutenção menos dependente de mudanças no código.
 
-**Adaptação por mercado e país.** Como discutido na Seção 3.10, a estrutura de cobertura pode variar entre países. Uma evolução natural seria permitir configurações de grupos e exceções específicas por mercado, sem perder a unidade do modelo global.
+**Adaptação por mercado e país.** Como discutido em *3.6 (Decisões de projeto)*, a estrutura de cobertura pode variar entre países. Uma evolução natural seria permitir configurações de grupos e exceções específicas por mercado, sem perder a unidade do modelo global.
 
 **Evolução da camada de apresentação.** O output atual em Excel é eficiente para analistas familiarizados com o processo, mas limita a adoção por outros perfis. Uma interface web simples, possivelmente em Streamlit ou Flask, poderia tornar a ferramenta acessível a usuários não técnicos, com upload de arquivo, escolha de país e visualização interativa dos resultados.
 
