@@ -215,30 +215,23 @@ O modo padrão é controlado por `DEFAULT_EXECUTION_MODE = "sequential"`. Adicio
 
 O benchmark mostrou que, no ambiente testado, a execução sequencial apresentou desempenho total superior à paralela. Esse resultado indica que o workload é predominantemente **CPU-bound** — o overhead de criação e sincronização de threads supera os ganhos potenciais de concorrência, limitados pelo GIL do Python para tarefas desse tipo. Com base nessa evidência, a execução sequencial passou a ser o modo padrão, mantendo o benchmark como opção para análises futuras (por exemplo, caso se migre a paralelização para `ProcessPoolExecutor` ou para uma execução distribuída).
 
+#### 3.10 Decisões de projeto e desafios enfrentados
 
-#### 4.7 Desafios enfrentados e soluções encontradas
+Ao longo do desenvolvimento, algumas decisões exigiram iteração e refinamento. Registrá-las aqui ajuda a evidenciar o raciocínio por trás da solução final e aponta caminhos naturais de evolução.
 
-Ao longo da execução do projeto, alguns desafios importantes surgiram.
+**Distinção efetiva entre matching bruto e normalizado.** Em uma versão inicial, a análise marcada como "raw" ainda estava operando sobre nomes já normalizados, o que anulava parte do valor da dupla abordagem descrita em 3.5. A correção envolveu separar explicitamente as estruturas de comparação e manter, em paralelo, duas representações do nome do cliente — original e normalizada. Essa separação é o que permite hoje capturar correspondências fortes pela via bruta e, ao mesmo tempo, recuperar casos difíceis pela via normalizada.
 
-**1. Diferença entre matching bruto e matching normalizado**  
-Em uma versão inicial, a análise considerada como “raw” ainda estava sendo executada sobre nomes normalizados, o que eliminava parte do valor da dupla abordagem. Esse problema foi corrigido ao separar explicitamente as estruturas de comparação para nome bruto e nome normalizado.
+**Deduplicação dos candidatos.** Como o mesmo candidato pode ser atingido tanto pela etapa raw quanto pela etapa normalizada, registros repetidos começaram a aparecer na saída. Foi necessário definir uma chave de deduplicação baseada em um conjunto de atributos do resultado (empresa, grupo, nível da conta, identificador da conta, lista de segmentação e score arredondado), aplicada antes da consolidação do Summary. O resultado é uma saída mais limpa, sem linhas redundantes competindo pela atenção do analista.
 
-**2. Duplicidade de resultados**  
-Como os candidatos podiam surgir a partir de mais de uma etapa de matching, houve necessidade de criar uma estratégia de deduplicação com base em atributos-chave do resultado, reduzindo repetição e melhorando a qualidade da saída final.
+**Representação das regras de negócio em código.** Traduzir a hierarquia comercial (segmentos, grupos, níveis de cobertura, exceções para contas Strategic) em uma lógica programável exigiu várias iterações. A decisão foi concentrar a configuração dos quatro grupos em `GROUP_CONFIG` dentro de `config.py`, com cada grupo associado a uma função de mapeamento de saída específica em `utils/matching.py`. Essa organização deixa explícito o que cada grupo faz e permite ajustes futuros com esforço localizado, sem propagar alterações pelo resto do código.
 
-**3. Organização do código**  
-A primeira versão concentrava muitas responsabilidades no arquivo principal. Ao longo da evolução, a solução foi modularizada em arquivos separados para configuração, execução, métricas, preparação de dados, matching, summary e acesso ao banco, tornando o projeto mais limpo, mais legível e mais sustentável.
+**Variação entre mercados e países.** A estrutura de cobertura não é universal: cada país pode definir suas próprias regras e estratégias locais para agrupar clientes, desde que alinhadas ao modelo comercial global. Além disso, a estrutura é revisada a cada planejamento anual e depois permanece congelada durante o ciclo de execução. Isso reforça a necessidade de acertar o mapeamento no momento certo, já que a configuração inicial do território terá impacto durante todo o período de vigência do plano de vendas. A parametrização por país e o cache local descritos em 3.3 endereçam parte desse desafio, mas a lógica de grupos e exceções ainda reflete o modelo comercial global — uma evolução natural seria permitir configurações por país.
 
-**4. Performance**  
-Foi implementado benchmark entre execução sequencial e paralela (ThreadPoolExecutor). O resultado mostrou que, no ambiente testado, a execução sequencial apresentou melhor desempenho total do que a paralela. Isso indicou que o workload do projeto é predominantemente CPU-bound, e que o overhead de threads superava os ganhos potenciais de concorrência. A partir disso, a execução sequencial passou a ser o modo padrão, mantendo o benchmark como opção para análise.
+**Modularização do código.** A primeira versão concentrava responsabilidades de acesso a dados, matching, priorização e apresentação em um único arquivo. À medida que novas funcionalidades foram sendo adicionadas (benchmark, métricas, realces visuais), a manutenção tornou-se progressivamente mais difícil. A reorganização em módulos descrita em 3.2 foi uma refatoração importante: isolou responsabilidades, reduziu acoplamento e tornou mais simples o trabalho de evolução futura.
 
-**5. Representação das regras de negócio**  
-Outro desafio foi traduzir corretamente as regras de priorização da estrutura comercial para uma lógica programável. A solução encontrada foi estruturar os grupos com configuração centralizada e regras explícitas no resumo final, permitindo ajustes futuros com menor esforço.
+**Escolha entre execução sequencial e paralela.** A paralelização por grupos via `ThreadPoolExecutor` foi implementada esperando ganho de tempo, mas o benchmark descrito em 3.9 revelou que a versão sequencial é mais rápida no ambiente atual. Essa decisão baseada em medição é um bom exemplo de como a ferramenta incorporou observabilidade do próprio desempenho (aba Metrics) como critério de escolha, em vez de assumir que paralelismo seria sempre preferível.
 
-**6. Variação entre mercados e países**  
-Outro desafio relevante é que a estrutura de cobertura não é universal e pode variar entre países e mercados. Cada unidade geográfica pode definir suas próprias regras e estratégias locais para agrupar clientes, desde que alinhadas ao modelo comercial global. Além disso, a estrutura de cobertura é revisada a cada planejamento anual e depois permanece congelada durante o ciclo de execução. Isso reforça a necessidade de tomar a decisão correta no momento do mapping, já que a configuração inicial do território terá impacto durante todo o período de vigência do plano de venda.
-
-### 5. Resultados 
+### 4. Resultados 
 
 O principal resultado do projeto foi transformar um processo altamente manual em uma solução majoritariamente automatizada, estruturada e orientada por regras de negócio, aplicando conceitos de sistemas inteligentes de apoio à decisão diretamente em um processo corporativo real, complexo e sensível para o negócio.
 
@@ -262,7 +255,7 @@ Um exemplo da presença de registros desatualizados e irrelevantes que dificulta
 <img width="975" height="100" alt="image" src="https://github.com/user-attachments/assets/0345b1f9-053f-4c58-b236-8b44f908351e" />
 Figura 6. Exemplo de dados desatualizados no sistema
 
-### 6. Conclusões
+### 5. Conclusões
 
 Este trabalho teve como objetivo reduzir a dependência de um processo manual, demorado e pouco escalável no mapeamento de clientes oriundos de aquisições, etapa crítica para a integração de vendedores em uma grande empresa de tecnologia. 
 
@@ -283,7 +276,7 @@ Essas melhorias podem ampliar ainda mais o impacto da solução, aumentando sua 
 
 Como consequência do projeto há uma discussão inicial para simplificação do processo e estudo para migração para plataformas existentes no mercado, como SAP e SalesForce.
 
-### 7. Referências
+### 6. Referências
 
 - Arquivos de solicitação e aplicação real armazenados na pasta [Results](https://github.com/leopcdata/bimaster_final/tree/main/results)   
 
