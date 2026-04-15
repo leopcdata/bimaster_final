@@ -189,18 +189,20 @@ A última etapa é construída em `utils/summary.py` e `utils/metrics.py`, invoc
 - **azul claro**: empresas com múltiplas linhas no summary (exigem revisão na aba Details);
 - **laranja claro**: registros de Activate Unassigned, que demandam atenção especial por não serem registros ativos no pipeline do ano corrente e exigirem etapas adicionais de processo para ativação.
 
+<img width="886" height="250" alt="image" src="https://github.com/user-attachments/assets/af6640f2-4002-476e-9065-bd7802060717" />
+
+Figura 3. Exemplo de um resultado prático da aplicação
+
 **Details** — Todos os candidatos encontrados pelo motor de matching, com score, nível da conta, atributos de cobertura, buying group, global client, grupo de origem e lista de segmentação.
 
 **Metrics** — Métricas de execução e qualidade organizadas em quatro blocos: visão geral (total de empresas processadas, encontradas e não encontradas, percentuais de cobertura, matches de alta confiança), tempos de execução (total e por grupo, incluindo comparativo entre os modos sequencial e paralelo quando o benchmark está ativo), distribuição de matches por grupo e distribuição de confiança do Summary por faixa de score.
 
-![image](https://private-user-images.githubusercontent.com/171187922/567294200-49fc9f46-24fb-42c8-aaca-ae46ae8dbe38.png)
-![image](https://private-user-images.githubusercontent.com/171187922/567294262-8ffb9f3f-b657-4ef2-9ac5-a3554a40b7f9.png)
+<img width="393" height="194" alt="image" src="https://github.com/user-attachments/assets/49fc9f46-24fb-42c8-aaca-ae46ae8dbe38" />
 
-Figuras 3 e 4. Resultados de métricas
+<img width="394" height="262" alt="image" src="https://github.com/user-attachments/assets/8ffb9f3f-b657-4ef2-9ac5-a3554a40b7f9" />
 
-![image](https://private-user-images.githubusercontent.com/171187922/567293947-af6640f2-4002-476e-9065-bd7802060717.png)
+Figuras 4 e 5. Resultados de métricas
 
-Figura 5. Exemplo de um resultado prático da aplicação
 
 #### 3.9 Estratégia de execução e benchmark
 
