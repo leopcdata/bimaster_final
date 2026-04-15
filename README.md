@@ -105,11 +105,11 @@ A extração é estruturada com três características principais:
 
 A consulta retorna, para cada cliente, os seguintes campos principais: identificador e nome da cobertura (`COV_TYPE_ID`), grupos globais e domésticos de buying group (`GBL_BUY_GRP`, `DOM_BUY_GRP`), identificador e nome do global client, nome legal do cliente, listas de segmentação válidas (`acct_list_ids`), indústria e país. Filtros adicionais garantem que apenas clientes ativos, em tipos de cobertura válidos e pertencentes ao grupo de listas oficial da estrutura comercial sejam retornados.
 
-![image](https://private-user-images.githubusercontent.com/171187922/567291676-c4cf4bff-5df9-435f-a7b4-e5f035105f13.png)
+<img width="539" height="303" alt="image" src="https://github.com/user-attachments/assets/c4cf4bff-5df9-435f-a7b4-e5f035105f13" />
 
 Figura 1. Exemplo de entrada do processo - Lista fornecida por um gestor
 
-![image](https://private-user-images.githubusercontent.com/171187922/567290197-032cc20f-c483-49ce-ac72-3153b1de954c.png)
+<img width="629" height="334" alt="image" src="https://github.com/user-attachments/assets/032cc20f-c483-49ce-ac72-3153b1de954c" />
 
 Figura 2. Total de clientes registrados nos EUA por segmento
 
