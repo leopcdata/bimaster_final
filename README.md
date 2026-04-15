@@ -200,8 +200,8 @@ Para executar em modo **paralelo**, basta alterar a constante para `"parallel"`.
 
 Para ativar o **benchmark** entre os dois modos na mesma execução, altere `RUN_BENCHMARK = True`. Nesse caso, a ferramenta executa as duas estratégias, registra os tempos comparativos na aba Metrics e usa automaticamente o resultado da estratégia mais rápida para o output final.
 
-#### 3.4 Durante a ExecuçAo
-#### Etapa 1 — Extração de dados
+#### 3.4 Durante a Execução
+#### 3.4.1 — Extração de dados
 
 A primeira etapa da solução consiste em obter, da base corporativa, o subconjunto de clientes que será utilizado como universo de busca. Essa etapa é implementada no módulo `utils/db_utils.py` e é acionada por `main.py` logo após a leitura do arquivo de input.
 
@@ -223,7 +223,7 @@ Figura 1. Exemplo de entrada do processo - Lista fornecida por um gestor
 
 Figura 2. Total de clientes registrados nos EUA por segmento
 
-#### Etapa 2 — Normalização textual
+#### 3.4.2 — Normalização textual
 
 O segundo desafio da solução é lidar com a inconsistência entre os nomes de empresas informados no input e os registrados na base corporativa. Para isso, `utils/normalize.py` implementa uma rotina de normalização que reduz diferenças de formatação sem alterar a identidade da empresa. A normalização aplica as seguintes transformações:
 
@@ -234,7 +234,7 @@ O segundo desafio da solução é lidar com a inconsistência entre os nomes de 
 
 Uma decisão importante do projeto foi **preservar simultaneamente o nome original e sua versão normalizada**. A normalização não substitui a comparação bruta; ela atua como uma camada complementar, permitindo que o matching use as duas representações em sequência.
 
-#### Etapa 3 — Estratégia de matching
+#### 3.4.3 — Estratégia de matching
 
 A comparação entre os nomes do input e os registros da base foi estruturada em duas abordagens complementares e sequenciais, com o objetivo de equilibrar precisão textual e flexibilidade diante de variações de escrita:
 
@@ -254,7 +254,7 @@ O uso de similaridade textual corrige uma distorção típica de abordagens por 
 
 Ainda assim, alguns casos permanecem ambíguos. Um exemplo é a entrada "As America, Inc", que pode retornar scores semelhantes para nomes como "Asm America" e "JAS America". Situações como essa indicam espaço para evolução, seja pela criação de regras adicionais baseadas na hierarquia de negócio, seja pela incorporação de técnicas complementares como embeddings semânticos.
 
-#### Etapa 4 — Agrupamento por regras de negócio
+#### 3.4.4 — Agrupamento por regras de negócio
 
 Uma contribuição central da modelagem foi estruturar o problema em **grupos de contas com regras de saída e prioridades distintas**, em vez de tratar toda a base da mesma forma. Os registros são organizados em quatro grupos, configurados em `GROUP_CONFIG` dentro de `config.py`:
 
@@ -273,7 +273,7 @@ Existe, porém, uma exceção bem definida para os Grupos 3 e 4: quando o códig
 
 Para ilustrar a relação entre os níveis de saída, tomemos como exemplo a PepsiCo: a organização PepsiCo como um todo corresponde à estrutura principal (`COV_TYPE_ID`); a divisão entre bebidas e alimentos é representada por diferentes `GBL_BUY_GRP`; e suas marcas individuais correspondem a diferentes `DOM_BUY_GRP`. Essa hierarquia permite diferentes coberturas comerciais para um mesmo conglomerado.
 
-#### Etapa 5 — Priorização e consolidação
+#### 3.4.5 — Priorização e consolidação
 
 Após a geração dos candidatos para todos os grupos, a ferramenta precisa consolidar uma recomendação final por empresa na aba Summary. Essa lógica é implementada em `utils/summary.py` (função `build_summary`), a partir dos candidatos montados em `utils/process_utils.py`.
 
@@ -289,7 +289,7 @@ Nos Grupos 3 e 4, quando múltiplos candidatos de alta confiança existem para a
 
 Como os candidatos podem surgir a partir de mais de uma etapa de matching (raw e normalizado), foi necessário implementar uma **estratégia de deduplicação** baseada em atributos-chave do resultado, reduzindo repetições e melhorando a qualidade da saída final.
 
-#### Etapa 6 — Geração de outputs
+#### 3.4.6 — Geração de outputs
 
 A última etapa é construída em `utils/summary.py` e `utils/metrics.py`, invocadas por `main.py` ao final da execução. O resultado é um único arquivo Excel com três abas:
 
