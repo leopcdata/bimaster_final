@@ -90,8 +90,118 @@ select_input_file → get_country_code → pd.read_excel
             → build_metrics_df
               → write_summary_excel
 ```
+#### 3.3 Como Executar
 
-#### 3.3 Etapa 1 — Extração de dados
+Esta seção descreve os passos necessários para executar a ferramenta localmente. A solução foi desenhada para um ambiente corporativo específico, com acesso a uma base DB2 interna, mas pode ser adaptada para fins de avaliação ou demonstração editando os parâmetros descritos abaixo.
+
+> **Nota sobre privacidade.** O repositório público omite intencionalmente arquivos com credenciais, configurações de servidor e dados reais da empresa. Os caminhos de pastas em `config.py` foram alterados para referências locais genéricas; no uso real, esses caminhos apontam para pastas em armazenamento na nuvem (Box corporativo) compartilhadas entre funcionários autorizados. Da mesma forma, o módulo de credenciais do banco não é versionado e precisa ser recriado localmente conforme descrito em 7.3.
+
+#### 3.3.1 Pré-requisitos
+
+- **Python 3.10 ou superior**
+- **Driver IBM DB2 instalado** (necessário para a biblioteca `ibm_db` se conectar ao banco corporativo). Em Windows, o caminho padrão usado pelo projeto é `C:\Program Files\IBM\SQLLIB\BIN`.
+- **Credenciais de acesso à base corporativa DB2** (fornecidas internamente pela empresa).
+- **Bibliotecas Python:** `pandas`, `openpyxl`, `rapidfuzz`, `ibm_db`.
+
+Para instalar as bibliotecas Python:
+
+```bash
+pip install pandas openpyxl rapidfuzz ibm_db
+```
+
+#### 3.3.2 Instalação
+
+Recomenda-se a criação de um ambiente virtual antes da instalação das dependências:
+
+```bash
+python -m venv venv
+# Windows
+venv\Scripts\activate
+# Linux / Mac
+source venv/bin/activate
+
+pip install pandas openpyxl rapidfuzz ibm_db
+```
+
+#### 3.3.3 Configuração
+
+**Passo 1 — Editar `config.py`.** Ajuste os três caminhos no topo do arquivo para pastas existentes na sua máquina:
+
+```python
+INPUT_FOLDER = r"C:\caminho\para\seus\arquivos\de\input"
+RESULTS_FOLDER = r"C:\caminho\para\salvar\resultados"
+CACHE_FOLDER = r"C:\caminho\para\cache"
+```
+
+**Passo 2 — Criar `utils/cmdw_config.py`.** Este arquivo não está versionado por conter dados sensíveis. Crie-o localmente com a seguinte estrutura mínima:
+
+```python
+def get_db_credentials():
+    return {
+        "DATABASE": "<nome_do_database>",
+        "HOSTNAME": "<endereco_do_servidor>",
+        "PORT": "<porta>",
+        "PROTOCOL": "TCPIP",
+        "UID": "<usuario>",
+        "PWD": "<senha>",
+    }
+```
+
+Substitua os valores entre colchetes pelos dados de acesso fornecidos internamente.
+
+**Passo 3 — Parâmetros opcionais.** O arquivo `config.py` também expõe parâmetros de execução que podem ser ajustados conforme a necessidade:
+
+| Parâmetro | Padrão | Descrição |
+|---|---|---|
+| `MATCH_LIMIT` | `20` | Número máximo de candidatos retornados por empresa na etapa de matching. |
+| `HIGH_CONFIDENCE_THRESHOLD` | `90` | Score mínimo para considerar um candidato de alta confiança. |
+| `MID_CONFIDENCE_THRESHOLD` | `50` | Score mínimo para considerar um candidato de fallback. |
+| `RUN_BENCHMARK` | `False` | Quando `True`, executa modos sequencial e paralelo na mesma rodada e seleciona o mais rápido. |
+| `DEFAULT_EXECUTION_MODE` | `"sequential"` | Modo padrão quando o benchmark não está ativo. Aceita `"sequential"` ou `"parallel"`. |
+
+#### 3.3.4 Formato do arquivo de input
+
+O arquivo de input deve ser um Excel (`.xlsx`) colocado na pasta `INPUT_FOLDER`. A única coluna obrigatória é:
+
+- **`Company`** — nome da empresa a ser mapeada (texto).
+
+O país associado à execução é informado interativamente no momento da execução (ver 3.3.5), e não pelo arquivo de input. Cada execução opera sobre um único país.
+
+Exemplos de inputs e outputs reais (com dados anonimizados ou de demonstração) podem ser consultados na pasta [`results/`](https://github.com/leopcdata/bimaster_final/tree/main/results) do repositório.
+
+#### 3.3.5 Execução
+
+A partir da raiz do projeto, execute:
+
+```bash
+python main.py
+```
+
+A ferramenta inicia um fluxo interativo no terminal, em duas perguntas:
+
+1. **Seleção do arquivo de input.** O sistema lista todos os arquivos `.xlsx` disponíveis em `INPUT_FOLDER` e solicita que o usuário escolha um pelo número correspondente.
+2. **Código do país.** Informe um código numérico de 3 dígitos correspondente ao país-alvo (campo `cca.ctrynum` na base corporativa).
+
+Após essas duas entradas, a execução prossegue automaticamente, com mensagens de log indicando o progresso de cada etapa (extração de dados, processamento por grupo, geração do output).
+
+O resultado é gravado na pasta `RESULTS_FOLDER` como um arquivo Excel com nome no formato:
+
+```
+<nome_do_input> ACL results - <YYYY-MM-DD_HH-MM>.xlsx
+```
+
+Esse arquivo contém as três abas descritas na Seção 3.8 — **Summary**, **Details** e **Metrics**.
+
+#### 3.3.6 Modos de execução e benchmark
+
+O modo de execução padrão é **sequencial**, definido por `DEFAULT_EXECUTION_MODE = "sequential"` em `config.py`. Esse modo se mostrou mais eficiente nos testes realizados, pelos motivos discutidos na Seção 3.9.
+
+Para executar em modo **paralelo**, basta alterar a constante para `"parallel"`.
+
+Para ativar o **benchmark** entre os dois modos na mesma execução, altere `RUN_BENCHMARK = True`. Nesse caso, a ferramenta executa as duas estratégias, registra os tempos comparativos na aba Metrics e usa automaticamente o resultado da estratégia mais rápida para o output final.
+
+#### 3.4 Durante a ExecuçAo
+#### Etapa 1 — Extração de dados
 
 A primeira etapa da solução consiste em obter, da base corporativa, o subconjunto de clientes que será utilizado como universo de busca. Essa etapa é implementada no módulo `utils/db_utils.py` e é acionada por `main.py` logo após a leitura do arquivo de input.
 
@@ -113,7 +223,7 @@ Figura 1. Exemplo de entrada do processo - Lista fornecida por um gestor
 
 Figura 2. Total de clientes registrados nos EUA por segmento
 
-#### 3.4 Etapa 2 — Normalização textual
+#### Etapa 2 — Normalização textual
 
 O segundo desafio da solução é lidar com a inconsistência entre os nomes de empresas informados no input e os registrados na base corporativa. Para isso, `utils/normalize.py` implementa uma rotina de normalização que reduz diferenças de formatação sem alterar a identidade da empresa. A normalização aplica as seguintes transformações:
 
@@ -124,7 +234,7 @@ O segundo desafio da solução é lidar com a inconsistência entre os nomes de 
 
 Uma decisão importante do projeto foi **preservar simultaneamente o nome original e sua versão normalizada**. A normalização não substitui a comparação bruta; ela atua como uma camada complementar, permitindo que o matching use as duas representações em sequência.
 
-#### 3.5 Etapa 3 — Estratégia de matching
+#### Etapa 3 — Estratégia de matching
 
 A comparação entre os nomes do input e os registros da base foi estruturada em duas abordagens complementares e sequenciais, com o objetivo de equilibrar precisão textual e flexibilidade diante de variações de escrita:
 
@@ -144,7 +254,7 @@ O uso de similaridade textual corrige uma distorção típica de abordagens por 
 
 Ainda assim, alguns casos permanecem ambíguos. Um exemplo é a entrada "As America, Inc", que pode retornar scores semelhantes para nomes como "Asm America" e "JAS America". Situações como essa indicam espaço para evolução, seja pela criação de regras adicionais baseadas na hierarquia de negócio, seja pela incorporação de técnicas complementares como embeddings semânticos.
 
-#### 3.6 Etapa 4 — Agrupamento por regras de negócio
+#### Etapa 4 — Agrupamento por regras de negócio
 
 Uma contribuição central da modelagem foi estruturar o problema em **grupos de contas com regras de saída e prioridades distintas**, em vez de tratar toda a base da mesma forma. Os registros são organizados em quatro grupos, configurados em `GROUP_CONFIG` dentro de `config.py`:
 
@@ -163,7 +273,7 @@ Existe, porém, uma exceção bem definida para os Grupos 3 e 4: quando o códig
 
 Para ilustrar a relação entre os níveis de saída, tomemos como exemplo a PepsiCo: a organização PepsiCo como um todo corresponde à estrutura principal (`COV_TYPE_ID`); a divisão entre bebidas e alimentos é representada por diferentes `GBL_BUY_GRP`; e suas marcas individuais correspondem a diferentes `DOM_BUY_GRP`. Essa hierarquia permite diferentes coberturas comerciais para um mesmo conglomerado.
 
-#### 3.7 Etapa 5 — Priorização e consolidação
+#### Etapa 5 — Priorização e consolidação
 
 Após a geração dos candidatos para todos os grupos, a ferramenta precisa consolidar uma recomendação final por empresa na aba Summary. Essa lógica é implementada em `utils/summary.py` (função `build_summary`), a partir dos candidatos montados em `utils/process_utils.py`.
 
@@ -179,7 +289,7 @@ Nos Grupos 3 e 4, quando múltiplos candidatos de alta confiança existem para a
 
 Como os candidatos podem surgir a partir de mais de uma etapa de matching (raw e normalizado), foi necessário implementar uma **estratégia de deduplicação** baseada em atributos-chave do resultado, reduzindo repetições e melhorando a qualidade da saída final.
 
-#### 3.8 Etapa 6 — Geração de outputs
+#### Etapa 6 — Geração de outputs
 
 A última etapa é construída em `utils/summary.py` e `utils/metrics.py`, invocadas por `main.py` ao final da execução. O resultado é um único arquivo Excel com três abas:
 
@@ -204,7 +314,7 @@ Figura 3. Exemplo de um resultado prático da aplicação
 Figuras 4 e 5. Resultados de métricas
 
 
-#### 3.9 Estratégia de execução e benchmark
+#### 3.5 Estratégia de execução e benchmark
 
 Para avaliar o desempenho da solução, `benchmark.py` implementa duas estratégias de execução que podem ser selecionadas via `config.py`:
 
@@ -215,7 +325,7 @@ O modo padrão é controlado por `DEFAULT_EXECUTION_MODE = "sequential"`. Adicio
 
 O benchmark mostrou que, no ambiente testado, a execução sequencial apresentou desempenho total superior à paralela. Esse resultado indica que o workload é predominantemente **CPU-bound** — o overhead de criação e sincronização de threads supera os ganhos potenciais de concorrência, limitados pelo GIL do Python para tarefas desse tipo. Com base nessa evidência, a execução sequencial passou a ser o modo padrão, mantendo o benchmark como opção para análises futuras (por exemplo, caso se migre a paralelização para `ProcessPoolExecutor` ou para uma execução distribuída).
 
-#### 3.10 Decisões de projeto e desafios enfrentados
+#### 3.6 Decisões de projeto e desafios enfrentados
 
 Ao longo do desenvolvimento, algumas decisões exigiram iteração e refinamento. Registrá-las aqui ajuda a evidenciar o raciocínio por trás da solução final e aponta caminhos naturais de evolução.
 
