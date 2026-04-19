@@ -421,7 +421,8 @@ Figura 7. Registro de Novo customer criado para As America, Inc.
 
 A análise dos resultados expôs também limitações estruturais da base corporativa que vão além do escopo da ferramenta, mas que afetam diretamente a qualidade dos mapeamentos. Um exemplo ilustrativo é o caso da MGM Studios: vendida pela Disney à Amazon em 2022, ainda aparece em ambos os registros no sistema, gerando candidatos concorrentes para a mesma entrada de input. Casos como esse mostram que, mesmo com uma estratégia de matching robusta, a presença de registros desatualizados na base pode produzir ambiguidades que nenhuma técnica textual resolveria sozinha.
 
-[![image](https://private-user-images.githubusercontent.com/171187922/567292868-0345b1f9-053f-4c58-b236-8b44f908351e.png?jwt=...)]
+<img width="975" height="100" alt="image" src="https://github.com/user-attachments/assets/0345b1f9-053f-4c58-b236-8b44f908351e" />
+
 Figura 8. Exemplo de dados desatualizados no sistema
 
 Essa observação é, ela própria, um resultado relevante do trabalho: ao expor de forma sistemática situações que antes ficavam diluídas no esforço manual, a ferramenta evidencia oportunidades concretas de melhoria de qualidade de dados na origem.
