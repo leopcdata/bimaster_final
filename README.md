@@ -411,13 +411,18 @@ A avaliação também identificou padrões qualitativos que complementam as mét
 
 **Cliente inexistente com falsos matches de alta confiança.** A empresa "As America, Inc." não existia na base corporativa no momento da análise. Apesar disso, o modelo retornou 3 candidatos com scores entre 90,9 e 95,2 (FIRST CASH, JAS FORWARDING CA, RS GROUP PLC), nenhum dos quais se confirmou como correspondência válida. Essa empresa foi posteriormente criada na base como novo registro, evidenciando que nomes genéricos ou muito curtos podem gerar falsos positivos com scores surpreendentemente altos. Este caso reforça a importância de manter o processo de revisão humana, especialmente para entradas com nomes pouco distintivos.
 
+<img width="706" height="136" alt="As America new cust" src="https://github.com/user-attachments/assets/2adaac3d-7463-465c-a5d4-94caaf90238f" />
+
+Figura 7. Registro de Novo customer criado para As America, Inc.
+
 **Falsos positivos concentrados na faixa intermediária.** As empresas CSC Generation Holdings (score 70,0), Fontana America (76,9), Sanctuary At Holy Cross (66,7) e VSI Liquidating (64,3) receberam recomendações de contas que não correspondiam ao resultado esperado ("Não encontrado"). Todas estão na faixa 60–79, o que reforça a evidência de que essa faixa produz mais ruído do que valor no contexto do Summary. Na aba Details, esses candidatos podem ainda ser úteis como ponto de partida para investigação manual, mas não deveriam compor a recomendação principal.
 
 #### 4.4 Limitações observadas e qualidade da base
 
 A análise dos resultados expôs também limitações estruturais da base corporativa que vão além do escopo da ferramenta, mas que afetam diretamente a qualidade dos mapeamentos. Um exemplo ilustrativo é o caso da MGM Studios: vendida pela Disney à Amazon em 2022, ainda aparece em ambos os registros no sistema, gerando candidatos concorrentes para a mesma entrada de input. Casos como esse mostram que, mesmo com uma estratégia de matching robusta, a presença de registros desatualizados na base pode produzir ambiguidades que nenhuma técnica textual resolveria sozinha.
 
-<!-- Inserir aqui a imagem da Figura 7 (MGM) -->
+[![image](https://private-user-images.githubusercontent.com/171187922/567292868-0345b1f9-053f-4c58-b236-8b44f908351e.png?jwt=...)]
+Figura 8. Exemplo de dados desatualizados no sistema
 
 Essa observação é, ela própria, um resultado relevante do trabalho: ao expor de forma sistemática situações que antes ficavam diluídas no esforço manual, a ferramenta evidencia oportunidades concretas de melhoria de qualidade de dados na origem.
 
