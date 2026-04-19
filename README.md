@@ -343,7 +343,6 @@ Ao longo do desenvolvimento, algumas decisões exigiram iteração e refinamento
 **Modularização do código.** A primeira versão concentrava responsabilidades de acesso a dados, matching, priorização e apresentação em um único arquivo. À medida que novas funcionalidades foram sendo adicionadas (benchmark, métricas, realces visuais), a manutenção tornou-se progressivamente mais difícil. A reorganização em módulos descrita em 3.2 foi uma refatoração importante: isolou responsabilidades, reduziu acoplamento e tornou mais simples o trabalho de evolução futura.
 
 **Escolha entre execução sequencial e paralela.** A paralelização por grupos via `ThreadPoolExecutor` foi implementada esperando ganho de tempo, mas o benchmark descrito em 3.5 revelou que a versão sequencial é mais rápida no ambiente atual. Essa decisão baseada em medição é um bom exemplo de como a ferramenta incorporou observabilidade do próprio desempenho (aba Metrics) como critério de escolha, em vez de assumir que paralelismo seria sempre preferível.
-
 ### 4. Resultados
 
 O principal resultado deste trabalho foi a transformação de um processo predominantemente manual, custoso e pouco escalável em uma solução automatizada, estruturada e orientada por regras de negócio, aplicando conceitos de sistemas inteligentes de apoio à decisão diretamente em um processo corporativo real, complexo e sensível para a operação comercial da empresa.
@@ -362,17 +361,67 @@ Em casos ambíguos, em que nenhum candidato isolado é claramente o melhor, a fe
 
 A padronização proporcionada pela ferramenta também contribui para a consistência das recomendações entre execuções e entre analistas distintos. Em vez de depender da experiência individual de quem conduz a análise, o processo passa a seguir um conjunto explícito de regras documentadas em código, o que melhora a governança e reduz a variabilidade dos mapeamentos.
 
-#### 4.3 Limitações observadas e qualidade da base
+#### 4.3 Avaliação quantitativa
+
+Para medir de forma objetiva a qualidade das recomendações do ACL, foi construído um conjunto de teste rotulado (*golden set*) com 23 empresas representativas dos principais cenários operacionais: matches exatos com alta confiança, empresas com nomes ambíguos, clientes inexistentes na base, registros com dados desatualizados e casos com múltiplas correspondências concorrentes. Para cada empresa, o resultado esperado foi definido manualmente com base no conhecimento operacional do processo. O output do modelo (aba Summary) foi então comparado sistematicamente com esse gabarito por meio de um script de avaliação dedicado (`evaluate.py`).
+
+##### Métricas de classificação
+
+Cada empresa foi classificada em uma das seguintes categorias:
+
+| Classificação | Descrição | Quantidade |
+|---|---|---|
+| **True Positive** | Modelo recomendou a conta correta como top-1 | 15 |
+| **True Negative** | Modelo não encontrou o cliente, e ele de fato não existe na base | 1 |
+| **False Positive** | Modelo recomendou uma conta, mas o cliente não existe ou não deveria ter match | 5 |
+| **Partial Match** | A conta correta aparece entre os candidatos, mas não como recomendação principal | 1 |
+| **Wrong Match** | Modelo recomendou uma conta diferente da esperada | 1 |
+| **False Negative** | Modelo não encontrou o cliente, mas deveria | 0 |
+
+A partir dessa classificação, foram calculadas as seguintes métricas:
+
+| Métrica | Valor |
+|---|---|
+| Acurácia estrita (TP + TN) / Total | **69,6%** |
+| Acurácia leniente (TP + TN + Partial) / Total | **73,9%** |
+| Precisão (TP / total de matches feitos) | **68,2%** |
+| Recall (TP / total de matches esperados) | **88,2%** |
+| F1-Score | **76,9%** |
+
+O recall de 88,2% indica que, quando o cliente de fato existe na base, a ferramenta o encontra na grande maioria dos casos. A principal oportunidade de melhoria está na precisão, puxada para baixo pelos falsos positivos concentrados na faixa de score intermediária.
+
+##### Análise por faixa de score
+
+A distribuição dos resultados por faixa de confiança revela um padrão claro:
+
+| Faixa de score | Empresas | Matches corretos | Matches incorretos ou falsos positivos | Taxa de erro |
+|---|---|---|---|---|
+| Alta confiança (≥ 90) | 12 | 11 | 1 | 8,3% |
+| Média-alta (80–89) | 2 | 2 | 0 | 0% |
+| Média-baixa (60–79) | 5 | 1 | 4 | **80%** |
+| Sem score (não encontrado) | 1 | 1 | 0 | 0% |
+
+A faixa de score entre 60 e 79 concentra **80% de taxa de erro**, com 4 das 5 empresas nessa faixa sendo falsos positivos — empresas que não deveriam ter recebido nenhuma recomendação. Em contrapartida, a faixa ≥ 80 apresenta taxa de erro de apenas 7,1% (1 erro em 14 empresas). Esse resultado sugere fortemente que elevar o `MID_CONFIDENCE_THRESHOLD` de 50 para 80 eliminaria a maioria dos falsos positivos sem perda significativa de cobertura.
+
+##### Casos especiais relevantes
+
+A avaliação também identificou padrões qualitativos que complementam as métricas numéricas:
+
+**Múltiplos matches com score 100% (possível dado desatualizado).** As empresas Bayer Cropscience Inc. e Bayer Cropscience LP retornaram simultaneamente duas contas distintas (BAYER e BASF) com score de 100%. Isso reflete a existência de registros corporativos vinculados a operações de M&A entre essas organizações. A ferramenta identifica corretamente ambos os candidatos, mas não consegue decidir entre eles sem informações adicionais sobre a relação societária atual. Nesses casos, a revisão com o time de Customer é indispensável.
+
+**Cliente inexistente com falsos matches de alta confiança.** A empresa "As America, Inc." não existia na base corporativa no momento da análise. Apesar disso, o modelo retornou 3 candidatos com scores entre 90,9 e 95,2 (FIRST CASH, JAS FORWARDING CA, RS GROUP PLC), nenhum dos quais se confirmou como correspondência válida. Essa empresa foi posteriormente criada na base como novo registro, evidenciando que nomes genéricos ou muito curtos podem gerar falsos positivos com scores surpreendentemente altos. Este caso reforça a importância de manter o processo de revisão humana, especialmente para entradas com nomes pouco distintivos.
+
+**Falsos positivos concentrados na faixa intermediária.** As empresas CSC Generation Holdings (score 70,0), Fontana America (76,9), Sanctuary At Holy Cross (66,7) e VSI Liquidating (64,3) receberam recomendações de contas que não correspondiam ao resultado esperado ("Não encontrado"). Todas estão na faixa 60–79, o que reforça a evidência de que essa faixa produz mais ruído do que valor no contexto do Summary. Na aba Details, esses candidatos podem ainda ser úteis como ponto de partida para investigação manual, mas não deveriam compor a recomendação principal.
+
+#### 4.4 Limitações observadas e qualidade da base
 
 A análise dos resultados expôs também limitações estruturais da base corporativa que vão além do escopo da ferramenta, mas que afetam diretamente a qualidade dos mapeamentos. Um exemplo ilustrativo é o caso da MGM Studios: vendida pela Disney à Amazon em 2022, ainda aparece em ambos os registros no sistema, gerando candidatos concorrentes para a mesma entrada de input. Casos como esse mostram que, mesmo com uma estratégia de matching robusta, a presença de registros desatualizados na base pode produzir ambiguidades que nenhuma técnica textual resolveria sozinha.
 
-<img width="975" height="100" alt="image" src="https://github.com/user-attachments/assets/0345b1f9-053f-4c58-b236-8b44f908351e" />
-
-Figura 7. Exemplo de dados desatualizados no sistema
+<!-- Inserir aqui a imagem da Figura 7 (MGM) -->
 
 Essa observação é, ela própria, um resultado relevante do trabalho: ao expor de forma sistemática situações que antes ficavam diluídas no esforço manual, a ferramenta evidencia oportunidades concretas de melhoria de qualidade de dados na origem.
 
-#### 4.4 Adoção da solução no ambiente corporativo
+#### 4.5 Adoção da solução no ambiente corporativo
 
 O resultado mais significativo do projeto, do ponto de vista de validação, foi sua adoção como ferramenta operacional no ambiente corporativo. Após apresentação à área responsável e validação dos resultados em casos reais de aquisição, a solução foi formalmente aprovada para uso e incorporada ao processo de integração de vendedores sob o nome **Acquisition Client Locator (ACL)**.
 
@@ -383,7 +432,7 @@ Essa adoção tem várias implicações que reforçam a relevância prática do 
 - **Estabelecimento como padrão operacional.** Ao receber um nome próprio e ser incorporada ao fluxo oficial, a solução passou a integrar a infraestrutura informal da área, o que tende a garantir uso continuado e criar demanda natural por evolução.
 - **Visibilidade interna.** A adoção transformou o projeto em um caso concreto dentro da empresa, gerando inclusive a discussão inicial sobre simplificação mais ampla do processo de mapeamento, com possibilidade de migração para plataformas corporativas como SAP e Salesforce no médio prazo.
 
-#### 4.5 Síntese técnica
+#### 4.6 Síntese técnica
 
 Como contribuição técnica, o projeto integra em uma única pipeline coerente um conjunto de elementos que normalmente aparecem isolados em soluções pontuais:
 
@@ -415,11 +464,13 @@ Por fim, o trabalho reforça uma reflexão de natureza mais ampla sobre o papel 
 
 #### Trabalhos Futuros
 
-Apesar dos resultados alcançados, o projeto apresenta limitações conhecidas e várias frentes naturais de evolução. Algumas delas já foram identificadas durante o uso da ferramenta no ambiente corporativo e podem ampliar significativamente o impacto da solução.
+Apesar dos resultados alcançados, o projeto apresenta limitações conhecidas e várias frentes naturais de evolução. Algumas delas já foram identificadas durante o uso da ferramenta no ambiente corporativo e pela avaliação quantitativa descrita na Seção 4.3, e podem ampliar significativamente o impacto da solução.
 
-**Avaliação quantitativa sistemática.** A próxima etapa de evolução mais imediata é a construção de um conjunto de teste rotulado (golden set) com casos representativos de cada grupo de negócio, permitindo medir métricas formais como acurácia top-1, acurácia top-k, precisão e recall do matching. Essa avaliação permitiria também calibrar de forma fundamentada os thresholds de confiança hoje definidos empiricamente.
+**Ajuste do threshold de fallback.** A avaliação quantitativa revelou que 80% dos resultados na faixa de score entre 60 e 79 são falsos positivos. Esse achado fundamenta a recomendação de elevar o `MID_CONFIDENCE_THRESHOLD` de 50 para 80, o que eliminaria a maioria dos falsos positivos na aba Summary sem perda significativa de cobertura. A mudança é simples (uma linha em `config.py`), mas sua validação em escala maior, com golden sets por país, é um passo natural antes da implementação definitiva.
 
-**Incorporação de técnicas avançadas de NLP.** A estratégia atual baseada em fuzzy matching textual é eficaz para a maioria dos casos, mas tem limitações em situações de ambiguidade semântica (como o exemplo "As America" descrito na Seção 3.5). A incorporação de embeddings semânticos via modelos pré-treinados (como sentence-transformers) poderia melhorar significativamente o tratamento desses casos, ao capturar similaridade de significado e não apenas de forma.
+**Ampliação do golden set.** O conjunto de teste atual, com 23 empresas, é suficiente para demonstrar a metodologia e identificar padrões, mas não tem escala para calibração estatisticamente robusta dos thresholds. Uma evolução importante seria ampliar esse conjunto para centenas de empresas, cobrindo múltiplos países e todos os quatro grupos de negócio de forma equilibrada, permitindo também segmentar as métricas por grupo e por faixa de score com maior confiança.
+
+**Incorporação de técnicas avançadas de NLP.** A estratégia atual baseada em fuzzy matching textual é eficaz para a maioria dos casos, mas tem limitações em situações de ambiguidade semântica (como o exemplo "As America" descrito na Seção 3.4.3). A incorporação de embeddings semânticos via modelos pré-treinados (como sentence-transformers) poderia melhorar significativamente o tratamento desses casos, ao capturar similaridade de significado e não apenas de forma.
 
 **Refinamento contínuo das regras de priorização.** A estrutura atual de quatro grupos com regras de saída específicas atende ao modelo comercial atual, mas é razoável esperar que ajustes sejam necessários a cada ciclo de planejamento. Documentar e versionar essas regras, e potencialmente extrair sua configuração para um arquivo externo editável por usuários de negócio, tornaria a manutenção menos dependente de mudanças no código.
 
