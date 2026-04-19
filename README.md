@@ -343,6 +343,7 @@ Ao longo do desenvolvimento, algumas decisões exigiram iteração e refinamento
 **Modularização do código.** A primeira versão concentrava responsabilidades de acesso a dados, matching, priorização e apresentação em um único arquivo. À medida que novas funcionalidades foram sendo adicionadas (benchmark, métricas, realces visuais), a manutenção tornou-se progressivamente mais difícil. A reorganização em módulos descrita em 3.2 foi uma refatoração importante: isolou responsabilidades, reduziu acoplamento e tornou mais simples o trabalho de evolução futura.
 
 **Escolha entre execução sequencial e paralela.** A paralelização por grupos via `ThreadPoolExecutor` foi implementada esperando ganho de tempo, mas o benchmark descrito em 3.5 revelou que a versão sequencial é mais rápida no ambiente atual. Essa decisão baseada em medição é um bom exemplo de como a ferramenta incorporou observabilidade do próprio desempenho (aba Metrics) como critério de escolha, em vez de assumir que paralelismo seria sempre preferível.
+
 ### 4. Resultados
 
 O principal resultado deste trabalho foi a transformação de um processo predominantemente manual, custoso e pouco escalável em uma solução automatizada, estruturada e orientada por regras de negócio, aplicando conceitos de sistemas inteligentes de apoio à decisão diretamente em um processo corporativo real, complexo e sensível para a operação comercial da empresa.
